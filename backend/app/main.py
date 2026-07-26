@@ -14,7 +14,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from app.config import get_settings
-from app.database import init_db
+from app.database import check_migrations
 from app.limiter import limiter
 from app.middleware import SecurityHeadersMiddleware, unhandled_exception_handler
 from app.routes_quotes import router as quotes_router
@@ -32,7 +32,9 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting Aurelia Logistics API...")
-    init_db()
+    # Schema is owned by Alembic. Refuse to serve traffic against a database
+    # that isn't migrated to head rather than creating tables on the fly.
+    check_migrations()
     logger.info("Database ready.")
     yield
     logger.info("Shutting down.")
