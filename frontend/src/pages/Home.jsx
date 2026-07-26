@@ -584,12 +584,17 @@ function QuoteCTA() {
 
 /* ─── CONTACT ─── */
 function HomeContact() {
-  const [form, setForm] = useState({ name: "", email: "", company: "", subject: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", company: "", message: "" });
 
   const { loading, submitted, error, handleSubmit } = useFormSubmit({
     validate: validateContactForm,
     submit: submitContact,
   });
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    handleSubmit(form);
+  };
 
   const inputStyle = {
     fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "white",
@@ -640,31 +645,31 @@ function HomeContact() {
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "rgba(245,240,232,0.45)", margin: 0 }}>We'll be in touch shortly.</p>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+              <form onSubmit={onSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: 18 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                   <div>
                     <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 7 }}>Name *</label>
-                    <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Your name" style={inputStyle}
+                    <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required autoComplete="name" placeholder="Your name" style={inputStyle}
                       onFocus={(e) => e.target.style.borderColor = "#C8963E"} onBlur={(e) => e.target.style.borderColor = "rgba(245,240,232,0.1)"} />
                   </div>
                   <div>
                     <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 7 }}>Email *</label>
-                    <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@company.com" style={inputStyle}
+                    <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} type="email" required autoComplete="email" placeholder="you@company.com" style={inputStyle}
                       onFocus={(e) => e.target.style.borderColor = "#C8963E"} onBlur={(e) => e.target.style.borderColor = "rgba(245,240,232,0.1)"} />
                   </div>
                 </div>
                 <div>
                   <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 7 }}>Company</label>
-                  <input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} placeholder="Company name" style={inputStyle}
+                  <input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} autoComplete="organization" placeholder="Company name" style={inputStyle}
                     onFocus={(e) => e.target.style.borderColor = "#C8963E"} onBlur={(e) => e.target.style.borderColor = "rgba(245,240,232,0.1)"} />
                 </div>
                 <div>
                   <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 7 }}>Message *</label>
-                  <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={4} placeholder="How can we help?" style={{ ...inputStyle, resize: "vertical" }}
+                  <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={4} required placeholder="How can we help?" style={{ ...inputStyle, resize: "vertical" }}
                     onFocus={(e) => e.target.style.borderColor = "#C8963E"} onBlur={(e) => e.target.style.borderColor = "rgba(245,240,232,0.1)"} />
                 </div>
                 {error && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#e07060", margin: 0 }}>{error}</p>}
-                <button onClick={() => handleSubmit(form)} disabled={loading} style={{
+                <button type="submit" disabled={loading} style={{
                   fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600,
                   padding: "15px 36px", background: loading ? "rgba(200,150,62,0.4)" : "linear-gradient(135deg, #C8963E, #A67B2E)",
                   color: "#071E12", border: "none", borderRadius: 3, cursor: loading ? "wait" : "pointer",
@@ -672,7 +677,7 @@ function HomeContact() {
                 }}>
                   {loading ? "Sending…" : "Send Message"}
                 </button>
-              </div>
+              </form>
             )}
           </FadeIn>
         </div>

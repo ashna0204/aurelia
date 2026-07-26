@@ -2,8 +2,7 @@
 Contact message routes — submit and list.
 """
 
-import asyncio
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
@@ -19,9 +18,15 @@ router = APIRouter(prefix="/api/contact", tags=["Contact"])
 settings = get_settings()
 
 
+# Sync handler on purpose — see the note in routes_quotes.create_quote.
 @router.post("/", response_model=SuccessResponse)
 @limiter.limit(f"{settings.rate_limit_per_minute}/minute")
-async def create_contact(request: Request, data: ContactCreate, db: Session = Depends(get_db)):
+def create_contact(
+    request: Request,
+    data: ContactCreate,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
     contact = ContactMessage(
         name=data.name,
         email=data.email,
@@ -33,7 +38,16 @@ async def create_contact(request: Request, data: ContactCreate, db: Session = De
     db.commit()
     db.refresh(contact)
 
-    asyncio.create_task(notify_new_contact(contact))
+    background_tasks.add_task(
+        notify_new_contact,
+        {
+            "name": contact.name,
+            "email": contact.email,
+            "company": contact.company,
+            "subject": contact.subject,
+            "message": contact.message,
+        },
+    )
 
     return SuccessResponse(
         message="Message received. We'll get back to you shortly.",

@@ -48,11 +48,16 @@ export default function QuotePage() {
   const blur = (e) => e.target.style.borderColor = "rgba(245,240,232,0.1)";
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
+  const onSubmit = (e) => {
+    e.preventDefault();
+    handleSubmit(form);
+  };
+
   return (
     <div style={{ background: "#071E12", minHeight: "100vh", paddingTop: 72 }}>
       <section style={{ padding: "72px 24px 100px" }}>
         <div style={{ maxWidth: 780, margin: "0 auto" }}>
-          <button onClick={() => navigate(-1)} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(200,150,62,0.65)", background: "none", border: "none", cursor: "pointer", letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 32, padding: 0 }}>
+          <button type="button" onClick={() => navigate(-1)} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(200,150,62,0.65)", background: "none", border: "none", cursor: "pointer", letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 32, padding: 0 }}>
             ← Back
           </button>
 
@@ -81,7 +86,7 @@ export default function QuotePage() {
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(200,150,62,0.65)", marginTop: 12 }}>
                   Sector: {form.sector || "General enquiry"}
                 </p>
-                <button onClick={() => navigate("/")} style={{
+                <button type="button" onClick={() => navigate("/")} style={{
                   marginTop: 32, fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600,
                   padding: "13px 32px", background: "transparent", color: "#C8963E",
                   border: "1px solid rgba(200,150,62,0.3)", borderRadius: 3, cursor: "pointer",
@@ -93,14 +98,15 @@ export default function QuotePage() {
             </FadeIn>
           ) : (
             <FadeIn delay={0.2}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+              <form onSubmit={onSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: 24 }}>
 
                 {/* Sector */}
                 <div>
                   <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 12 }}>Sector *</label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                     {SECTORS.map((s) => (
-                      <button key={s} onClick={() => setForm({ ...form, sector: s })} style={{
+                      // type="button" — inside a <form>, buttons submit by default.
+                      <button key={s} type="button" aria-pressed={form.sector === s} onClick={() => setForm({ ...form, sector: s })} style={{
                         fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500,
                         padding: "10px 18px", borderRadius: 40, cursor: "pointer", transition: "all 0.25s",
                         background: form.sector === s ? "rgba(200,150,62,0.15)" : "rgba(245,240,232,0.04)",
@@ -118,7 +124,7 @@ export default function QuotePage() {
                   <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 8 }}>
                     What do you need? *
                   </label>
-                  <textarea value={form.description} onChange={set("description")} rows={4}
+                  <textarea value={form.description} onChange={set("description")} rows={4} required
                     placeholder="e.g. 500kg Matta Rice + 200kg Toor Dall, FOB Kochi — or — 500 sets brake pads for Toyota Hilux — or — Paracetamol 500mg tablets, 1M units, WHO-GMP, for Kenya"
                     style={{ ...inputStyle, resize: "vertical" }} onFocus={focus} onBlur={blur} />
                 </div>
@@ -127,22 +133,22 @@ export default function QuotePage() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                   <div>
                     <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 8 }}>Full Name *</label>
-                    <input value={form.name} onChange={set("name")} placeholder="Your name" style={inputStyle} onFocus={focus} onBlur={blur} />
+                    <input value={form.name} onChange={set("name")} required autoComplete="name" placeholder="Your name" style={inputStyle} onFocus={focus} onBlur={blur} />
                   </div>
                   <div>
                     <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 8 }}>Email *</label>
-                    <input value={form.email} onChange={set("email")} placeholder="you@company.com" style={inputStyle} onFocus={focus} onBlur={blur} />
+                    <input value={form.email} onChange={set("email")} type="email" required autoComplete="email" placeholder="you@company.com" style={inputStyle} onFocus={focus} onBlur={blur} />
                   </div>
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                   <div>
                     <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 8 }}>Company</label>
-                    <input value={form.company} onChange={set("company")} placeholder="Company Ltd." style={inputStyle} onFocus={focus} onBlur={blur} />
+                    <input value={form.company} onChange={set("company")} autoComplete="organization" placeholder="Company Ltd." style={inputStyle} onFocus={focus} onBlur={blur} />
                   </div>
                   <div>
                     <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 8 }}>Phone</label>
-                    <input value={form.phone} onChange={set("phone")} placeholder="+44 7XXX XXXXXX" style={inputStyle} onFocus={focus} onBlur={blur} />
+                    <input value={form.phone} onChange={set("phone")} type="tel" autoComplete="tel" placeholder="+44 7XXX XXXXXX" style={inputStyle} onFocus={focus} onBlur={blur} />
                   </div>
                 </div>
 
@@ -177,7 +183,7 @@ export default function QuotePage() {
 
                 {error && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#e07060", margin: 0 }}>{error}</p>}
 
-                <button onClick={() => handleSubmit(form)} disabled={loading} style={{
+                <button type="submit" disabled={loading} style={{
                   fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600,
                   padding: "18px 48px", alignSelf: "flex-start",
                   background: loading ? "rgba(200,150,62,0.4)" : "linear-gradient(135deg, #C8963E, #A67B2E)",
@@ -190,7 +196,7 @@ export default function QuotePage() {
                 >
                   {loading ? "Submitting…" : "Submit Quote Request"}
                 </button>
-              </div>
+              </form>
             </FadeIn>
           )}
         </div>

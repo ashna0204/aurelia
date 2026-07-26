@@ -16,10 +16,8 @@ from slowapi.errors import RateLimitExceeded
 from app.config import get_settings
 from app.database import init_db
 from app.limiter import limiter
-from app.seed import seed
 from app.routes_quotes import router as quotes_router
 from app.routes_contact import router as contact_router
-from app.routes_products import router as products_router
 
 # ─── Logging ───
 logging.basicConfig(
@@ -34,7 +32,6 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     logger.info("Starting Aurelia Logistics API...")
     init_db()
-    seed()
     logger.info("Database ready.")
     yield
     logger.info("Shutting down.")
@@ -45,11 +42,15 @@ settings = get_settings()
 
 app = FastAPI(
     title=settings.app_name,
-    description="Backend API for Aurelia Logistics — spice sourcing and supply chain from the Indian subcontinent.",
+    description="Backend API for Aurelia Logistics — trade enquiries and quote requests.",
     version="1.0.0",
     lifespan=lifespan,
-    docs_url="/docs",
-    redoc_url="/redoc",
+    # Interactive docs are development-only. In production they would expose the
+    # full API surface (and invite the stray "string" submissions that Swagger's
+    # "Try it out" produces) to anyone who finds the host.
+    docs_url="/docs" if settings.debug else None,
+    redoc_url="/redoc" if settings.debug else None,
+    openapi_url="/openapi.json" if settings.debug else None,
 )
 
 app.state.limiter = limiter
@@ -68,7 +69,6 @@ app.add_middleware(
 # ─── Routes ───
 app.include_router(quotes_router)
 app.include_router(contact_router)
-app.include_router(products_router)
 
 
 @app.get("/", tags=["Health"])
@@ -76,7 +76,7 @@ def root():
     return {
         "name": settings.app_name,
         "status": "running",
-        "docs": "/docs",
+        "docs": "/docs" if settings.debug else None,
     }
 
 

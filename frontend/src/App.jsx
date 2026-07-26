@@ -8,6 +8,7 @@ import EthnicFood from "./pages/EthnicFood";
 import VehicleParts from "./pages/VehicleParts";
 import Pharmaceuticals from "./pages/Pharmaceuticals";
 import QuotePage from "./pages/QuotePage";
+import NotFound from "./pages/NotFound";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -27,6 +28,7 @@ function Layout() {
         <Route path="/specialisations/vehicle-parts" element={<VehicleParts />} />
         <Route path="/specialisations/pharmaceuticals" element={<Pharmaceuticals />} />
         <Route path="/quote" element={<QuotePage />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
     </>

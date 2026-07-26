@@ -24,9 +24,13 @@ cp .env.example .env
 uvicorn app.main:app --reload --port 8000
 ```
 
-The API will be live at **http://localhost:8000** with interactive docs at **/docs**.
+The API will be live at **http://localhost:8000**.
 
-On first launch, the database is created automatically and seeded with the 7 spice products.
+Interactive docs at **/docs** and **/redoc** are served **only when `DEBUG=true`**. With
+`DEBUG=false` they return 404, along with `/openapi.json`, so the API surface isn't
+advertised in production.
+
+On first launch, the database and its tables are created automatically.
 
 ---
 
@@ -38,10 +42,10 @@ On first launch, the database is created automatically and seeded with the 7 spi
 |--------|----------|-------------|
 | `POST` | `/api/quotes/` | Submit a quote request |
 | `POST` | `/api/contact/` | Submit a contact message |
-| `GET` | `/api/products/` | Get all active products |
-| `GET` | `/api/products/{slug}` | Get single product by slug |
 
-### Admin (for future admin panel)
+Both are rate limited to `RATE_LIMIT_PER_MINUTE` submissions per IP per minute.
+
+### Admin — requires `X-API-Key` header
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -50,9 +54,12 @@ On first launch, the database is created automatically and seeded with the 7 spi
 | `PATCH` | `/api/quotes/{id}/status` | Update quote status |
 | `GET` | `/api/contact/` | List all messages |
 | `PATCH` | `/api/contact/{id}/read` | Mark message as read |
-| `POST` | `/api/products/` | Add a product |
-| `PUT` | `/api/products/{id}` | Update a product |
-| `DELETE` | `/api/products/{id}` | Deactivate a product |
+
+Set `API_KEY` in `.env` to a strong random value (`openssl rand -hex 32`). If it is
+left blank, every admin endpoint returns **503** — they are never open.
+
+> **Note:** product catalog endpoints (`/api/products/`) were removed. The frontend
+> renders its catalog from `frontend/src/data.js`; the API was never called by it.
 
 ---
 
@@ -67,11 +74,11 @@ aurelia-backend/
 │   ├── database.py          # SQLAlchemy engine & session
 │   ├── models.py            # DB table definitions
 │   ├── schemas.py           # Pydantic request/response models
-│   ├── seed.py              # Initial product data
+│   ├── auth.py              # X-API-Key admin authentication
+│   ├── limiter.py           # Shared slowapi rate limiter
 │   ├── email_service.py     # SMTP email notifications
 │   ├── routes_quotes.py     # /api/quotes endpoints
-│   ├── routes_contact.py    # /api/contact endpoints
-│   └── routes_products.py   # /api/products endpoints
+│   └── routes_contact.py    # /api/contact endpoints
 ├── .env.example
 ├── requirements.txt
 └── README.md
@@ -113,7 +120,15 @@ const products = await fetch(`${API_BASE}/api/products/`).then(r => r.json());
 
 ## Production Notes
 
-- **Database**: Swap `DATABASE_URL` from SQLite to PostgreSQL for production
-- **Auth**: Admin routes currently have no authentication — add JWT or API key auth before deploying
-- **HTTPS**: Use a reverse proxy (Nginx, Caddy) with TLS in production
-- **Hosting**: Works great on Railway, Render, DigitalOcean, or any VPS with Python 3.11+
+- **Secrets**: never commit `.env`. Both `.gitignore` files exclude it — keep it that way.
+- **`DEBUG`**: must be `false` in production. It also controls SQLAlchemy `echo`, which
+  would otherwise log every customer submission in plaintext.
+- **Database**: swap `DATABASE_URL` from SQLite to PostgreSQL. The SQLite file contains
+  customer PII and is gitignored.
+- **Rate limiting**: `slowapi` currently uses in-memory storage — it resets on restart and
+  is per-process, so it gives no protection behind multiple workers. Point it at Redis
+  before running more than one worker.
+- **Migrations**: the single Alembic revision is a no-op; the schema is created by
+  `Base.metadata.create_all()` at startup. Generate a real baseline before relying on Alembic.
+- **HTTPS**: use a reverse proxy (Nginx, Caddy) with TLS.
+- **Hosting**: works on Railway, Render, DigitalOcean, or any VPS with Python 3.11+

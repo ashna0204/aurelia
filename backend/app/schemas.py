@@ -65,35 +65,6 @@ class ContactResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-# ─── Products ───
-
-class ProductBase(BaseModel):
-    name: str = Field(..., max_length=100)
-    slug: str = Field(..., max_length=100)
-    origin: str = Field(..., max_length=150)
-    description: str | None = None
-    image_url: str | None = None
-    grade: str | None = None
-    packaging: str | None = None
-    moq: str | None = None
-    moisture: str | None = None
-    shelf_life: str | None = None
-    is_active: bool = True
-    sort_order: int = 0
-
-
-class ProductCreate(ProductBase):
-    pass
-
-
-class ProductResponse(ProductBase):
-    id: int
-    created_at: datetime
-    updated_at: datetime
-
-    model_config = {"from_attributes": True}
-
-
 # ─── Generic ───
 
 class SuccessResponse(BaseModel):

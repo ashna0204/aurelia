@@ -2,8 +2,7 @@
 Quote request routes — submit, list, get, update status.
 """
 
-import asyncio
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
@@ -19,9 +18,17 @@ router = APIRouter(prefix="/api/quotes", tags=["Quotes"])
 settings = get_settings()
 
 
+# Defined with `def`, not `async def`: the ORM calls below are synchronous and
+# would block the event loop for every other request. FastAPI runs sync handlers
+# in a threadpool instead.
 @router.post("/", response_model=SuccessResponse)
 @limiter.limit(f"{settings.rate_limit_per_minute}/minute")
-async def create_quote(request: Request, data: QuoteCreate, db: Session = Depends(get_db)):
+def create_quote(
+    request: Request,
+    data: QuoteCreate,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
     quote = QuoteRequest(
         name=data.name,
         email=data.email,
@@ -37,7 +44,23 @@ async def create_quote(request: Request, data: QuoteCreate, db: Session = Depend
     db.commit()
     db.refresh(quote)
 
-    asyncio.create_task(notify_new_quote(quote))
+    # Snapshot the fields into a plain dict *before* the request ends. The email
+    # runs after the response is sent, by which point the session is closed and
+    # the ORM instance is detached.
+    background_tasks.add_task(
+        notify_new_quote,
+        {
+            "name": quote.name,
+            "email": quote.email,
+            "company": quote.company,
+            "phone": quote.phone,
+            "products": list(quote.products or []),
+            "volume": quote.volume,
+            "frequency": quote.frequency,
+            "destination": quote.destination,
+            "message": quote.message,
+        },
+    )
 
     return SuccessResponse(
         message="Quote request submitted successfully. We'll be in touch within 24 hours.",

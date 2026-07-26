@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     smtp_port: int = 587
     smtp_user: str = ""
     smtp_password: str = ""
-    notification_email: str = "enquiries@aurelialogistics.co.uk"
+    notification_email: str = "ashnacp0225@gmail.com"
 
     # Admin API key — required to access admin endpoints
     api_key: str = ""

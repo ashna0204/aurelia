@@ -19,6 +19,10 @@ async def send_email(to: str, subject: str, html_body: str) -> bool:
         logger.warning("SMTP not configured — skipping email send.")
         return False
 
+    if not to:
+        logger.warning("NOTIFICATION_EMAIL is not set — skipping email send.")
+        return False
+
     try:
         import aiosmtplib
 
@@ -44,21 +48,24 @@ async def send_email(to: str, subject: str, html_body: str) -> bool:
         return False
 
 
-async def notify_new_quote(quote) -> bool:
+async def notify_new_quote(quote: dict) -> bool:
+    """`quote` is a plain dict snapshot, not an ORM object — this runs after the
+    response is sent and the DB session has already been closed."""
     settings = get_settings()
-    products_list = ", ".join(html.escape(p) for p in quote.products) if quote.products else "Not specified"
+    products = quote.get("products") or []
+    products_list = ", ".join(html.escape(str(p)) for p in products) if products else "Not specified"
 
-    name = html.escape(str(quote.name or ""))
-    email_addr = html.escape(str(quote.email or ""))
-    company = html.escape(str(quote.company or "—"))
-    phone = html.escape(str(quote.phone or "—"))
-    volume = html.escape(str(quote.volume or "—"))
-    frequency = html.escape(str(quote.frequency or "—"))
-    destination = html.escape(str(quote.destination or "—"))
+    name = html.escape(str(quote.get("name") or ""))
+    email_addr = html.escape(str(quote.get("email") or ""))
+    company = html.escape(str(quote.get("company") or "—"))
+    phone = html.escape(str(quote.get("phone") or "—"))
+    volume = html.escape(str(quote.get("volume") or "—"))
+    frequency = html.escape(str(quote.get("frequency") or "—"))
+    destination = html.escape(str(quote.get("destination") or "—"))
     message_html = (
         "<div style='margin-top: 16px; padding: 16px; background: white; border-radius: 4px; border-left: 3px solid #C8963E;'>"
-        f"<strong>Message:</strong><br/>{html.escape(str(quote.message))}</div>"
-        if quote.message else ""
+        f"<strong>Message:</strong><br/>{html.escape(str(quote['message']))}</div>"
+        if quote.get("message") else ""
     )
 
     body = f"""
@@ -89,14 +96,15 @@ async def notify_new_quote(quote) -> bool:
     )
 
 
-async def notify_new_contact(contact) -> bool:
+async def notify_new_contact(contact: dict) -> bool:
+    """`contact` is a plain dict snapshot — see notify_new_quote."""
     settings = get_settings()
 
-    name = html.escape(str(contact.name or ""))
-    email_addr = html.escape(str(contact.email or ""))
-    company = html.escape(str(contact.company or "—"))
-    subject_text = html.escape(str(contact.subject or "—"))
-    message_body = html.escape(str(contact.message or ""))
+    name = html.escape(str(contact.get("name") or ""))
+    email_addr = html.escape(str(contact.get("email") or ""))
+    company = html.escape(str(contact.get("company") or "—"))
+    subject_text = html.escape(str(contact.get("subject") or "—"))
+    message_body = html.escape(str(contact.get("message") or ""))
 
     body = f"""
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -119,6 +127,6 @@ async def notify_new_contact(contact) -> bool:
 
     return await send_email(
         to=settings.notification_email,
-        subject=f"[Aurelia] Contact — {name}: {contact.subject or 'General Enquiry'}",
+        subject=f"[Aurelia] Contact — {name}: {contact.get('subject') or 'General Enquiry'}",
         html_body=body,
     )

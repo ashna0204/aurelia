@@ -7,7 +7,11 @@
  * feedback that mirrors the server rules.
  */
 
-export const isValidEmail = (email) => email.includes("@") && email.includes(".");
+// Deliberately permissive — the point is to catch obvious typos before a round
+// trip, not to police RFC 5322. Pydantic's EmailStr is the real gate.
+const EMAIL_RE = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/;
+
+export const isValidEmail = (email) => EMAIL_RE.test(email.trim());
 
 const isFilled = (value, min) => value.trim().length >= min;
 
