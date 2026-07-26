@@ -6,7 +6,7 @@ Reverse-chronological. Newest phase at the top.
 
 ## Phase 1 — Threat Model + Audit Report — 2026-07-26
 
-- **Commits:** `c244019` — `docs(security): add Phase 1 threat model and findings register`
+- **Commits:** `2feeda3` — `docs(security): add Phase 1 threat model and findings register`
 
 - **Deliverable:** `SECURITY_AUDIT.md` — system overview and data-flow diagram, asset
   register, STRIDE tables for all six trust boundaries, 27 findings, GDPR compliance gap
