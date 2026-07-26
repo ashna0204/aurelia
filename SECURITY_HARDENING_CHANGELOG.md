@@ -7,8 +7,6 @@ Reverse-chronological. Newest phase at the top.
 ## Phase 2 — Backend Hardening — 2026-07-27
 
 - **Commits:**
-  - `2feeda3` — `docs(security): add Phase 1 threat model and findings register — CWE-1053`
-  - `ab82042` — `docs(security): correct Phase 1 commit SHA in changelog`
   - `26bdb61` — `security(backend): fail-loud secret loading and constant-time key compare — CWE-1188, CWE-208, CWE-540`
   - `91fea6d` — `security(backend): add security headers, error handler, tighten CORS — CWE-693, CWE-209, CWE-942`
   - `1767fc7` — `security(backend): write real migrations, drop create_all, gate startup on schema — CWE-665`
