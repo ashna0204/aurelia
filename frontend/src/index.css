@@ -1,0 +1,25 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { overflow-x: hidden; background: #071E12; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+::selection { background: rgba(200,150,62,0.28); color: #0A2E1C; }
+
+@keyframes float0 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-18px); } }
+@keyframes float1 { 0%,100% { transform: translateY(0) translateX(0); } 50% { transform: translateY(-13px) translateX(8px); } }
+@keyframes float2 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-22px); } }
+
+input::placeholder, textarea::placeholder { color: rgba(245,240,232,0.22); }
+select option { background: #0D2A1A; color: #F5F0E8; }
+
+@media (max-width: 768px) {
+  .desk-nav { display: none !important; }
+  .mob-menu-btn { display: flex !important; }
+  .about-grid,
+  .contact-grid,
+  .sahya-grid,
+  .brand-compare { grid-template-columns: 1fr !important; gap: 40px !important; }
+  .spec-card { grid-template-columns: 1fr !important; }
+  .spec-card > div:last-child { display: none; }
+}
+@media (min-width: 769px) {
+  .mob-menu { display: none !important; }
+}
