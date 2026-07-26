@@ -14,8 +14,10 @@ logger = logging.getLogger(__name__)
 
 async def send_email(to: str, subject: str, html_body: str) -> bool:
     settings = get_settings()
+    smtp_password = settings.smtp_password.get_secret_value()
 
-    if not settings.smtp_user or not settings.smtp_password:
+    # Only reachable when ENV=local — config makes these mandatory elsewhere.
+    if not settings.smtp_user or not smtp_password:
         logger.warning("SMTP not configured — skipping email send.")
         return False
 
@@ -37,7 +39,7 @@ async def send_email(to: str, subject: str, html_body: str) -> bool:
             hostname=settings.smtp_host,
             port=settings.smtp_port,
             username=settings.smtp_user,
-            password=settings.smtp_password,
+            password=smtp_password,
             start_tls=True,
         )
         logger.info(f"Email sent to {to}: {subject}")

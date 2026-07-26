@@ -1,20 +1,53 @@
 """
 Application configuration — loads from .env file or environment variables.
+
+Secrets are typed as SecretStr so they never render in a repr(), a debugger
+frame, or an exception context. None of them carry a default: a missing secret
+is a startup failure, not a silently degraded runtime.
 """
 
+import base64
+import binascii
+from functools import lru_cache
 from typing import Literal
 
-from pydantic import model_validator
+from pydantic import SecretStr, model_validator
 from pydantic_settings import BaseSettings
-from functools import lru_cache
+
+#: Minimum decoded entropy for the admin API key. 32 bytes = 256 bits.
+MIN_API_KEY_BYTES = 32
+
+
+def _decoded_entropy_bytes(value: str) -> int:
+    """Best-effort decoded length of a key, in bytes.
+
+    Accepts the two shapes an operator is likely to produce —
+    ``openssl rand -hex 32`` (64 hex chars) and ``openssl rand -base64 32``
+    (44 chars) — and falls back to the raw character count for anything else,
+    which is the conservative reading for a hand-typed passphrase.
+    """
+    candidate = value.strip()
+
+    try:
+        return len(bytes.fromhex(candidate))
+    except (ValueError, binascii.Error):
+        pass
+
+    try:
+        # validate=True so ordinary ASCII text isn't silently treated as base64
+        return len(base64.b64decode(candidate, validate=True))
+    except (ValueError, binascii.Error):
+        pass
+
+    return len(candidate.encode("utf-8"))
 
 
 class Settings(BaseSettings):
-    # App
+    # ─── App ───
     app_name: str = "Aurelia Logistics API"
 
-    # Deployment environment. Drives the DEBUG guard below and, from Phase 2,
-    # the gating of /docs and the CORS origin list.
+    # Deployment environment. Drives the DEBUG guard, the /docs gate, and which
+    # settings are mandatory.
     env: Literal["local", "staging", "production"] = "local"
 
     # Debug is opt-in and must never be enabled in production: it turns on
@@ -24,20 +57,26 @@ class Settings(BaseSettings):
 
     allowed_origins: str = "http://localhost:5173,http://localhost:3000"
 
-    # Database
+    # ─── Database ───
     database_url: str = "sqlite:///./aurelia.db"
 
-    # SMTP for email notifications
+    # ─── SMTP ───
+    # Credentials are optional in local development (the notifier no-ops with a
+    # warning) but mandatory anywhere else — see _require_deployment_settings.
     smtp_host: str = "smtp.gmail.com"
     smtp_port: int = 587
     smtp_user: str = ""
-    smtp_password: str = ""
-    notification_email: str = "ashnacp0225@gmail.com"
+    smtp_password: SecretStr = SecretStr("")
+    # No default. A hardcoded fallback here previously meant that an unset
+    # NOTIFICATION_EMAIL silently routed customer enquiries to a personal inbox.
+    notification_email: str = ""
 
-    # Admin API key — required to access admin endpoints
-    api_key: str = ""
+    # ─── Admin ───
+    # Guards every endpoint that returns customer PII. Required in all
+    # environments; validated for entropy below.
+    api_key: SecretStr = SecretStr("")
 
-    # Rate limiting (applied to public submission endpoints)
+    # ─── Rate limiting ───
     rate_limit_per_minute: int = 5
 
     @model_validator(mode="after")
@@ -57,9 +96,64 @@ class Settings(BaseSettings):
             )
         return self
 
+    @model_validator(mode="after")
+    def _require_api_key(self) -> "Settings":
+        """The admin key is the only control protecting stored customer PII.
+
+        An empty key previously let the app boot "healthy" while every admin
+        endpoint returned 503 — a misconfiguration that only surfaced when the
+        operator tried to read their enquiries. Fail at startup instead.
+        """
+        key = self.api_key.get_secret_value()
+
+        if not key:
+            raise ValueError(
+                "API_KEY is required. It protects every endpoint that returns "
+                "customer personal data. Generate one with: openssl rand -hex 32"
+            )
+
+        entropy = _decoded_entropy_bytes(key)
+        if entropy < MIN_API_KEY_BYTES:
+            raise ValueError(
+                f"API_KEY is too weak: {entropy} bytes of entropy, minimum is "
+                f"{MIN_API_KEY_BYTES}. Generate one with: openssl rand -hex 32"
+            )
+
+        return self
+
+    @model_validator(mode="after")
+    def _require_deployment_settings(self) -> "Settings":
+        """Outside local development, mail delivery must actually be configured.
+
+        Locally, an unconfigured notifier is a convenience — the API still
+        works and the send is skipped with a warning. In staging or production
+        it means enquiries are accepted and silently never delivered, so the
+        same condition has to be fatal.
+        """
+        if self.env == "local":
+            return self
+
+        missing = [
+            name
+            for name, value in (
+                ("SMTP_USER", self.smtp_user),
+                ("SMTP_PASSWORD", self.smtp_password.get_secret_value()),
+                ("NOTIFICATION_EMAIL", self.notification_email),
+            )
+            if not value
+        ]
+        if missing:
+            raise ValueError(
+                f"{', '.join(missing)} must be set when ENV={self.env}. "
+                "Without them, enquiries are accepted but the notification "
+                "email is silently dropped."
+            )
+
+        return self
+
     @property
     def cors_origins(self) -> list[str]:
-        return [origin.strip() for origin in self.allowed_origins.split(",")]
+        return [origin.strip() for origin in self.allowed_origins.split(",") if origin.strip()]
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
