@@ -76,6 +76,12 @@ class Settings(BaseSettings):
     # environments; validated for entropy below.
     api_key: SecretStr = SecretStr("")
 
+    # ─── Audit ───
+    # Destination for the append-only admin-access log. Empty logs to stdout,
+    # which is fine for containers that ship stdout, but a real deployment
+    # should point this at a durable append-only path or volume.
+    audit_log_path: str = ""
+
     # ─── Rate limiting ───
     # Public submission endpoints, per client IP.
     rate_limit_per_minute: int = 5
