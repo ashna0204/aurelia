@@ -10,13 +10,16 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from app.config import get_settings
 from app.database import check_migrations
 from app.limiter import limiter
-from app.middleware import SecurityHeadersMiddleware, unhandled_exception_handler
+from app.middleware import (
+    SecurityHeadersMiddleware,
+    rate_limit_handler,
+    unhandled_exception_handler,
+)
 from app.routes_quotes import router as quotes_router
 from app.routes_contact import router as contact_router
 
@@ -57,7 +60,7 @@ app = FastAPI(
 )
 
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 
 # Anything that escapes a route handler becomes an opaque 500 with a
 # correlation ID; the traceback stays server-side.

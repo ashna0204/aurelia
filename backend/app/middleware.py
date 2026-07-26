@@ -3,10 +3,12 @@ Response-hygiene middleware — security headers and a catch-all error handler.
 """
 
 import logging
+import time
 import uuid
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
 from starlette.middleware.base import BaseHTTPMiddleware
 
 logger = logging.getLogger(__name__)
@@ -40,6 +42,36 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             if header not in response.headers:
                 response.headers[header] = value
         return response
+
+
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+    """Return 429 with a Retry-After the client can actually act on.
+
+    slowapi's bundled handler emits Retry-After only when the Limiter is built
+    with ``headers_enabled=True`` — but that mode also tries to inject headers
+    into whatever the endpoint returned, which raises for any handler returning
+    a Pydantic model rather than a Response. Computing the value here keeps the
+    header without constraining every handler's return type or signature.
+    """
+    retry_after = 60
+
+    try:
+        limiter = request.app.state.limiter
+        limit, scope = request.state.view_rate_limit
+        reset_at, _remaining = limiter.limiter.get_window_stats(limit, *scope)
+        retry_after = max(1, int(reset_at - time.time()))
+    except Exception:  # noqa: BLE001 — never let header computation break the 429
+        logger.debug("Could not compute Retry-After; using default", exc_info=True)
+
+    return JSONResponse(
+        status_code=429,
+        content={
+            "detail": (
+                "Too many requests. Please wait a moment and try again."
+            )
+        },
+        headers={**SECURITY_HEADERS, "Retry-After": str(retry_after)},
+    )
 
 
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:

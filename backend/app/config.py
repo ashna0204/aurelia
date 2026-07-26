@@ -77,7 +77,24 @@ class Settings(BaseSettings):
     api_key: SecretStr = SecretStr("")
 
     # ─── Rate limiting ───
+    # Public submission endpoints, per client IP.
     rate_limit_per_minute: int = 5
+    # Admin endpoints, per client IP.
+    admin_rate_limit_per_minute: int = 30
+
+    # Shared counter store. Empty means in-process memory, which is per-worker
+    # and cleared on restart — permitted only when ENV=local (see limiter.py).
+    #   e.g. redis://localhost:6379/0
+    rate_limit_storage_uri: str = ""
+
+    # Comma-separated IPs or CIDR blocks of reverse proxies permitted to set
+    # X-Forwarded-For. Empty means "trust nothing" and fall back to the socket
+    # peer, which is the safe default for a directly-exposed app.
+    trusted_proxies: str = ""
+
+    @property
+    def trusted_proxy_list(self) -> list[str]:
+        return [p.strip() for p in self.trusted_proxies.split(",") if p.strip()]
 
     @model_validator(mode="after")
     def _forbid_debug_in_production(self) -> "Settings":

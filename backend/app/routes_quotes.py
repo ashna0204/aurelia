@@ -69,7 +69,9 @@ def create_quote(
 
 
 @router.get("/", response_model=list[QuoteResponse], dependencies=[Depends(require_api_key)])
+@limiter.limit(f"{settings.admin_rate_limit_per_minute}/minute")
 def list_quotes(
+    request: Request,
     status: str | None = Query(None, pattern="^(new|reviewed|quoted|closed)$"),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
@@ -82,7 +84,8 @@ def list_quotes(
 
 
 @router.get("/{quote_id}", response_model=QuoteResponse, dependencies=[Depends(require_api_key)])
-def get_quote(quote_id: int, db: Session = Depends(get_db)):
+@limiter.limit(f"{settings.admin_rate_limit_per_minute}/minute")
+def get_quote(request: Request, quote_id: int, db: Session = Depends(get_db)):
     quote = db.query(QuoteRequest).filter(QuoteRequest.id == quote_id).first()
     if not quote:
         raise HTTPException(status_code=404, detail="Quote not found")
@@ -90,7 +93,13 @@ def get_quote(quote_id: int, db: Session = Depends(get_db)):
 
 
 @router.patch("/{quote_id}/status", response_model=QuoteResponse, dependencies=[Depends(require_api_key)])
-def update_quote_status(quote_id: int, data: QuoteStatusUpdate, db: Session = Depends(get_db)):
+@limiter.limit(f"{settings.admin_rate_limit_per_minute}/minute")
+def update_quote_status(
+    request: Request,
+    quote_id: int,
+    data: QuoteStatusUpdate,
+    db: Session = Depends(get_db),
+):
     quote = db.query(QuoteRequest).filter(QuoteRequest.id == quote_id).first()
     if not quote:
         raise HTTPException(status_code=404, detail="Quote not found")

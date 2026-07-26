@@ -56,7 +56,9 @@ def create_contact(
 
 
 @router.get("/", response_model=list[ContactResponse], dependencies=[Depends(require_api_key)])
+@limiter.limit(f"{settings.admin_rate_limit_per_minute}/minute")
 def list_contacts(
+    request: Request,
     is_read: bool | None = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
@@ -69,7 +71,8 @@ def list_contacts(
 
 
 @router.patch("/{message_id}/read", response_model=ContactResponse, dependencies=[Depends(require_api_key)])
-def mark_as_read(message_id: int, db: Session = Depends(get_db)):
+@limiter.limit(f"{settings.admin_rate_limit_per_minute}/minute")
+def mark_as_read(request: Request, message_id: int, db: Session = Depends(get_db)):
     msg = db.query(ContactMessage).filter(ContactMessage.id == message_id).first()
     if not msg:
         raise HTTPException(status_code=404, detail="Message not found")
