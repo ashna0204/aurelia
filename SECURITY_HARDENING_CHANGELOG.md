@@ -4,6 +4,48 @@ Reverse-chronological. Newest phase at the top.
 
 ---
 
+## Phase 1 — Threat Model + Audit Report — 2026-07-26
+
+- **Commits:** `c244019` — `docs(security): add Phase 1 threat model and findings register`
+
+- **Deliverable:** `SECURITY_AUDIT.md` — system overview and data-flow diagram, asset
+  register, STRIDE tables for all six trust boundaries, 27 findings, GDPR compliance gap
+  register, and the Phase 5 verification checklist.
+
+- **Findings raised:** AUR-SEC-001 … AUR-SEC-027
+  (1 Critical, 7 High, 12 Medium, 7 Low)
+
+- **Findings deferred to a client decision:**
+  - `AUR-SEC-002` — public FOB price sheet + supplier name. Highest-value commercial
+    finding; the brief forbids changing business content without approval.
+  - `AUR-SEC-021` — `theme.js` adopt-or-delete; touching 65 style literals needs design
+    sign-off against the "do not change the visual language" constraint.
+
+- **Notable results:**
+  - **Email header injection is NOT exploitable** — tested three payload shapes. Python's
+    `email` library raises `HeaderParseError` on ASCII CRLF and RFC 2047-encodes
+    non-ASCII; the real subject template always contains an em dash, so it always
+    encodes. Reported as tested-and-cleared rather than as a finding.
+  - **Twelve brief-listed issues were already fixed** in `9ae4d16` — sync handlers,
+    `BackgroundTasks`, `/docs` gating, products API removal, email regex, `<form>`
+    semantics, 404 route, favicon, dead `subject` field, and more. Recorded in
+    `SECURITY_AUDIT.md` §7.2 with evidence so they are not re-opened.
+  - **No SQL injection** — the ORM is parameterised throughout; no raw SQL anywhere.
+  - **The Swagger-pollution claim is confirmed** — rows 5-9 of the committed DB are five
+    identical `"string"` records across a 33-minute window.
+  - **A privacy notice does not exist** (GDPR-02). Both forms collect name, email and
+    phone with no notice, purpose, retention statement or rights information. This is a
+    larger compliance exposure than most of the technical findings and was not in the brief.
+
+- **Open questions for client:** eight, in `SECURITY_AUDIT.md` §6. The four that block
+  Phase 2/3 work:
+  1. Was the GitHub remote ever public? (converts the incident to a notifiable breach)
+  2. Is Aurelia Logistics a UK-registered entity with ICO registration?
+  3. Should FOB pricing and the supplier name stay public? *(recommend: no)*
+  4. Move production mail off the personal Gmail app password? *(recommend: yes)*
+
+---
+
 ## Phase 0 — Emergency Response — 2026-07-26
 
 - **Commits:**
