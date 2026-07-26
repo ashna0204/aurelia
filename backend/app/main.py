@@ -15,6 +15,7 @@ from slowapi.errors import RateLimitExceeded
 from app.config import get_settings
 from app.database import check_migrations
 from app.limiter import limiter
+from app.logging_config import configure_logging
 from app.middleware import (
     SecurityHeadersMiddleware,
     rate_limit_handler,
@@ -24,10 +25,10 @@ from app.routes_quotes import router as quotes_router
 from app.routes_contact import router as contact_router
 
 # ─── Logging ───
-logging.basicConfig(
-    level=logging.DEBUG if get_settings().debug else logging.INFO,
-    format="%(asctime)s  %(levelname)-8s  %(name)s  %(message)s",
-)
+# Attaches a filter that masks email addresses and phone numbers on every
+# handler, so a stray log statement degrades to a redacted line rather than
+# writing customer PII to disk.
+configure_logging(debug=get_settings().debug)
 logger = logging.getLogger(__name__)
 
 

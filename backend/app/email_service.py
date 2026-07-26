@@ -42,7 +42,10 @@ async def send_email(to: str, subject: str, html_body: str) -> bool:
             password=smtp_password,
             start_tls=True,
         )
-        logger.info(f"Email sent to {to}: {subject}")
+        # Deliberately does NOT log the subject: it embeds the customer's name,
+        # so logging it wrote PII into the application log on every successful
+        # notification, at INFO level, in production.
+        logger.info("Notification email sent.")
         return True
 
     except Exception as e:

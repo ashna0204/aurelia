@@ -19,7 +19,11 @@ if settings.database_url.startswith("sqlite"):
 engine = create_engine(
     settings.database_url,
     connect_args=connect_args,
-    echo=settings.debug,
+    # echo=True logs every bound parameter — customer names, emails and phone
+    # numbers — verbatim. Config already refuses DEBUG=true when
+    # ENV=production, but this states the invariant at the point of use rather
+    # than relying on that guard alone.
+    echo=settings.debug and settings.env != "production",
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
