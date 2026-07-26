@@ -8,7 +8,7 @@ Reverse-chronological. Newest phase at the top.
 
 - **Commits:**
   - `f76618f` — `docs(security): add Phase 0 incident records — CWE-540, CWE-359`
-  - `e366f6f` — `security(backend): reject DEBUG=true when ENV=production — CWE-489`
+  - `0f1ce89` — `security(backend): reject DEBUG=true when ENV=production — CWE-489`
   - *(pre-existing, verified this phase)* `9ae4d16` — removed tracked DB, venv, `__pycache__`; gated `/docs`
 
 - **Findings closed:**
