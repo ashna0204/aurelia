@@ -2,6 +2,8 @@
 Quote request routes — submit, list, get, update status.
 """
 
+import logging
+
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -16,6 +18,7 @@ from app.email_service import notify_new_quote
 
 router = APIRouter(prefix="/api/quotes", tags=["Quotes"])
 settings = get_settings()
+logger = logging.getLogger(__name__)
 
 
 # Defined with `def`, not `async def`: the ORM calls below are synchronous and
@@ -29,6 +32,16 @@ def create_quote(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
+    # Honeypot: `website` is hidden from humans, so a non-empty value means an
+    # automated submission. Answer with the ordinary success response instead of
+    # an error — a bot that gets a 422 learns to try again without the field,
+    # whereas a 200 gives it no signal. Nothing is stored and no email is sent.
+    if data.website:
+        logger.info("Discarded quote submission: honeypot field was filled.")
+        return SuccessResponse(
+            message="Quote request submitted successfully. We'll be in touch within 24 hours.",
+        )
+
     quote = QuoteRequest(
         name=data.name,
         email=data.email,

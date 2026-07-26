@@ -58,9 +58,14 @@ async def notify_new_quote(quote: dict) -> bool:
     response is sent and the DB session has already been closed."""
     settings = get_settings()
     products = quote.get("products") or []
-    products_list = ", ".join(html.escape(str(p)) for p in products) if products else "Not specified"
+    # Raw values for the Subject header, escaped values for the HTML body. The
+    # subject is plain text: escaping it there renders a customer named O'Brien
+    # as "O&#x27;Brien" in the inbox.
+    raw_name = str(quote.get("name") or "")
+    raw_products = ", ".join(str(p) for p in products) if products else "Not specified"
 
-    name = html.escape(str(quote.get("name") or ""))
+    products_list = html.escape(raw_products)
+    name = html.escape(raw_name)
     email_addr = html.escape(str(quote.get("email") or ""))
     company = html.escape(str(quote.get("company") or "—"))
     phone = html.escape(str(quote.get("phone") or "—"))
@@ -96,7 +101,7 @@ async def notify_new_quote(quote: dict) -> bool:
 
     return await send_email(
         to=settings.notification_email,
-        subject=f"[Aurelia] New Quote — {name} ({products_list})",
+        subject=f"[Aurelia] New Quote — {raw_name} ({raw_products})",
         html_body=body,
     )
 
@@ -105,7 +110,10 @@ async def notify_new_contact(contact: dict) -> bool:
     """`contact` is a plain dict snapshot — see notify_new_quote."""
     settings = get_settings()
 
-    name = html.escape(str(contact.get("name") or ""))
+    # Raw for the Subject header, escaped for the HTML body — see notify_new_quote.
+    raw_name = str(contact.get("name") or "")
+
+    name = html.escape(raw_name)
     email_addr = html.escape(str(contact.get("email") or ""))
     company = html.escape(str(contact.get("company") or "—"))
     subject_text = html.escape(str(contact.get("subject") or "—"))
@@ -132,6 +140,6 @@ async def notify_new_contact(contact: dict) -> bool:
 
     return await send_email(
         to=settings.notification_email,
-        subject=f"[Aurelia] Contact — {name}: {contact.get('subject') or 'General Enquiry'}",
+        subject=f"[Aurelia] Contact — {raw_name}: {contact.get('subject') or 'General Enquiry'}",
         html_body=body,
     )

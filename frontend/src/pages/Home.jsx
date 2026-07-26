@@ -5,6 +5,21 @@ import SectionTag from "../components/SectionTag";
 import { submitContact } from "../api/client";
 import { validateContactForm } from "../utils/validation";
 import { useFormSubmit } from "../hooks/useFormSubmit";
+import { LIMITS } from "../constants/quoteForm";
+
+/* ─── Contact form ─── */
+const contactLabelStyle = {
+  fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)",
+  letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 7,
+};
+
+// Mirrors ContactCreate in backend/app/schemas.py.
+const CONTACT_MAX = {
+  name: LIMITS.NAME_MAX,
+  email: LIMITS.EMAIL_MAX,
+  company: LIMITS.COMPANY_MAX,
+  message: LIMITS.MESSAGE_MAX,
+};
 
 /* ─── Easing ─── */
 const easeOut = (t) => 1 - Math.pow(1 - t, 3);
@@ -585,10 +600,17 @@ function QuoteCTA() {
 /* ─── CONTACT ─── */
 function HomeContact() {
   const [form, setForm] = useState({ name: "", email: "", company: "", message: "" });
+  const fieldRefs = useRef({});
 
-  const { loading, submitted, error, handleSubmit } = useFormSubmit({
+  const { loading, submitted, error, fieldErrors, handleSubmit, revalidate } = useFormSubmit({
     validate: validateContactForm,
     submit: submitContact,
+    onValidationError: (field) => {
+      const el = fieldRefs.current[field];
+      if (!el) return;
+      el.focus({ preventScroll: true });
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    },
   });
 
   const onSubmit = (e) => {
@@ -602,6 +624,34 @@ function HomeContact() {
     borderRadius: 3, padding: "13px 16px", width: "100%", boxSizing: "border-box",
     outline: "none", transition: "border-color 0.3s",
   };
+
+  // Same pattern as the quote form: an invalid field keeps a red border while
+  // unfocused so the message and the input it refers to read as one unit.
+  const styleFor = (field) => ({
+    ...inputStyle,
+    borderColor: fieldErrors[field] ? "rgba(224,112,96,0.6)" : "rgba(245,240,232,0.1)",
+  });
+  const contactField = (field) => ({
+    id: `contact-${field}`,
+    ref: (el) => { fieldRefs.current[field] = el; },
+    value: form[field],
+    onChange: (e) => setForm({ ...form, [field]: e.target.value }),
+    maxLength: CONTACT_MAX[field],
+    "aria-invalid": fieldErrors[field] ? true : undefined,
+    "aria-describedby": fieldErrors[field] ? `contact-${field}-error` : undefined,
+    style: styleFor(field),
+    onFocus: (e) => { e.target.style.borderColor = "#C8963E"; },
+    onBlur: (e) => {
+      e.target.style.borderColor = fieldErrors[field] ? "rgba(224,112,96,0.6)" : "rgba(245,240,232,0.1)";
+      revalidate(form);
+    },
+  });
+  const contactError = (field) =>
+    fieldErrors[field] ? (
+      <p id={`contact-${field}-error`} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#e07060", margin: "6px 0 0" }}>
+        {fieldErrors[field]}
+      </p>
+    ) : null;
 
   return (
     <section id="contact" style={{ background: "#071E12", padding: "100px 24px" }}>
@@ -648,27 +698,37 @@ function HomeContact() {
               <form onSubmit={onSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: 18 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                   <div>
-                    <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 7 }}>Name *</label>
-                    <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required autoComplete="name" placeholder="Your name" style={inputStyle}
-                      onFocus={(e) => e.target.style.borderColor = "#C8963E"} onBlur={(e) => e.target.style.borderColor = "rgba(245,240,232,0.1)"} />
+                    <label htmlFor="contact-name" style={contactLabelStyle}>Name *</label>
+                    <input {...contactField("name")} required autoComplete="name" placeholder="Your name" />
+                    {contactError("name")}
                   </div>
                   <div>
-                    <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 7 }}>Email *</label>
-                    <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} type="email" required autoComplete="email" placeholder="you@company.com" style={inputStyle}
-                      onFocus={(e) => e.target.style.borderColor = "#C8963E"} onBlur={(e) => e.target.style.borderColor = "rgba(245,240,232,0.1)"} />
+                    <label htmlFor="contact-email" style={contactLabelStyle}>Email *</label>
+                    <input {...contactField("email")} type="email" required autoComplete="email" placeholder="you@company.com" />
+                    {contactError("email")}
                   </div>
                 </div>
                 <div>
-                  <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 7 }}>Company</label>
-                  <input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} autoComplete="organization" placeholder="Company name" style={inputStyle}
-                    onFocus={(e) => e.target.style.borderColor = "#C8963E"} onBlur={(e) => e.target.style.borderColor = "rgba(245,240,232,0.1)"} />
+                  <label htmlFor="contact-company" style={contactLabelStyle}>Company</label>
+                  <input {...contactField("company")} autoComplete="organization" placeholder="Company name" />
+                  {contactError("company")}
                 </div>
                 <div>
-                  <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 7 }}>Message *</label>
-                  <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={4} required placeholder="How can we help?" style={{ ...inputStyle, resize: "vertical" }}
-                    onFocus={(e) => e.target.style.borderColor = "#C8963E"} onBlur={(e) => e.target.style.borderColor = "rgba(245,240,232,0.1)"} />
+                  <label htmlFor="contact-message" style={contactLabelStyle}>Message *</label>
+                  <textarea {...contactField("message")} rows={4} required placeholder="How can we help?"
+                    style={{ ...styleFor("message"), resize: "vertical" }} />
+                  {contactError("message")}
                 </div>
-                {error && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#e07060", margin: 0 }}>{error}</p>}
+                {/* Announced on appearance — see the note in QuotePage. */}
+                <div role="alert" aria-live="assertive">
+                  {error ? (
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#e07060", margin: 0 }}>{error}</p>
+                  ) : Object.keys(fieldErrors).length > 0 ? (
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#e07060", margin: 0 }}>
+                      Please correct the {Object.keys(fieldErrors).length === 1 ? "highlighted field" : "highlighted fields"} above.
+                    </p>
+                  ) : null}
+                </div>
                 <button type="submit" disabled={loading} style={{
                   fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600,
                   padding: "15px 36px", background: loading ? "rgba(200,150,62,0.4)" : "linear-gradient(135deg, #C8963E, #A67B2E)",
