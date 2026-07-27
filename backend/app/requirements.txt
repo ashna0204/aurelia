@@ -6,4 +6,5 @@ pydantic-settings==2.5.0
 python-dotenv==1.0.1
 aiosmtplib==3.0.2
 slowapi==0.1.9
+redis==5.0.8
 alembic==1.13.3
