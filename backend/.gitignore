@@ -11,6 +11,12 @@ venv/
 __pycache__/
 *.py[cod]
 
+# Test / coverage artifacts
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
 # Local database — contains customer PII, must never be committed
 *.db
 *.sqlite

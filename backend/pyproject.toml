@@ -1,0 +1,27 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+addopts = "--cov=app --cov-report=term-missing --cov-report=html --cov-fail-under=90"
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+omit = [
+    # Alembic is migration tooling, not application code under test.
+    "alembic/*",
+    "app/alembic/*",
+    # __init__ marks the package; it carries no logic to exercise.
+    "app/__init__.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    # The CLI entry block never runs under pytest.
+    "if __name__ == .__main__.:",
+    # Import-time typing guards contain no runtime behavior.
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]

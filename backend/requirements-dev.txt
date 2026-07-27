@@ -1,0 +1,10 @@
+# Test/dev dependencies. Installs the runtime deps too, then the test stack.
+-r app/requirements.txt
+
+pytest
+pytest-asyncio
+pytest-cov
+httpx
+anyio
+faker
+freezegun
