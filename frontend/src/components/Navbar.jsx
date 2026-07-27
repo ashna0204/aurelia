@@ -10,11 +10,18 @@ const LINKS = [
   { label: "Contact", to: "/#contact" },
 ];
 
+// In-page anchor targets, top-to-bottom. Matched against whichever section is
+// in view on the home page; the ids live on the sections in Home.jsx.
+const HOME_SECTIONS = ["home", "about", "contact"];
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
   const location = useLocation();
   const go = useSmartNavigate();
+
+  const onHome = location.pathname === "/";
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 60);
@@ -24,6 +31,44 @@ export default function Navbar() {
 
   useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
+  // Scroll-spy: on the home page, highlight whichever section is most in view.
+  // IntersectionObserver reports real visibility, which — unlike a scroll-offset
+  // marker — correctly tracks the final section even though it sits at the very
+  // bottom and never reaches the top of the viewport. Off the home page the
+  // sections don't exist, so this is a no-op.
+  useEffect(() => {
+    if (!onHome) return;
+    const els = HOME_SECTIONS
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+    if (els.length === 0) return;
+
+    const ratios = new Map(HOME_SECTIONS.map((id) => [id, 0]));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          ratios.set(entry.target.id, entry.isIntersecting ? entry.intersectionRatio : 0);
+        }
+        // The most-visible section wins; ties resolve to the topmost. When
+        // nothing tracked is on screen (e.g. the tall between-sections regions)
+        // the last active section is left in place.
+        let best = null;
+        let bestRatio = 0;
+        for (const id of HOME_SECTIONS) {
+          const r = ratios.get(id) ?? 0;
+          if (r > bestRatio) {
+            bestRatio = r;
+            best = id;
+          }
+        }
+        if (best) setActiveSection(best);
+      },
+      { threshold: [0, 0.25, 0.5, 0.75, 1] },
+    );
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [onHome]);
+
   const handleNav = (e, to) => {
     e.preventDefault();
     setMenuOpen(false);
@@ -31,11 +76,15 @@ export default function Navbar() {
   };
 
   const isActive = (to) => {
-    if (to === "/") return location.pathname === "/";
-    return location.pathname.startsWith(to.split("#")[0]) && to !== "/";
+    // In-page anchors ("/#about") light up only on the home page, and only
+    // when their section is the one currently in view — never on other routes.
+    const hash = to.split("#")[1];
+    if (hash) return onHome && activeSection === hash;
+    // The Home link owns the top-of-page section, not the whole route.
+    if (to === "/") return onHome && activeSection === "home";
+    // Real routes match by path prefix, covering nested pages.
+    return location.pathname.startsWith(to);
   };
-
-  const onHome = location.pathname === "/";
 
   return (
     <nav style={{
