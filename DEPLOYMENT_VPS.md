@@ -58,9 +58,15 @@ match to the recommended **2 vCPU / 2 GB** tier.
 | **OVHcloud** | VPS‑2 | 2 | 4 GB | 80 GB SSD | Unmetered* | **~£6–7/mo** | London (UK) |
 | **Contabo** | Cloud VPS 10 | 3 | 8 GB | 75 GB NVMe | 32 TB | **~£6/mo** | London (UK) |
 | **IONOS** | VPS Linux M/L | 2 | 2–4 GB | 80 GB SSD | Unlimited | **~£4–7/mo** (intro) | UK |
+| **Hostinger** | KVM 2 | 2 | 8 GB | 100 GB NVMe | 2 TB | **~£7/mo** (intro) | UK (London) |
 | **UpCloud** | 2 GB plan | 1 | 2 GB | 50 GB SSD | 2 TB | **~$18/mo (~£14)** | London |
 
 \* "Unmetered/unlimited" transfer is subject to fair‑use policies.
+
+> **Intro pricing caveat (IONOS, Hostinger):** headline prices are promotional and require a
+> long upfront term (**12–24 months**), then **renew ~20–40% higher** (Hostinger KVM 2 renews
+> around **~£11/mo**). Hostinger throws in generous RAM (8 GB) and NVMe, but plan for the
+> renewal rate and the lock‑in.
 
 > **Not in this table but worth knowing — Hetzner Cloud.** Best price/performance in
 > Europe by a wide margin (CX22: **2 vCPU / 4 GB / 40 GB ≈ €4.59/mo**), but its nearest
@@ -102,6 +108,7 @@ match to the recommended **2 vCPU / 2 GB** tier.
 |-----------------------------|--------:|-------:|
 | Contabo VPS 10 | ~£6 | ~£72 |
 | OVHcloud VPS‑2 | ~£6.5 | ~£78 |
+| Hostinger KVM 2 (intro) | ~£7 | ~£84 |
 | Linode / Vultr 2 GB | ~£9.5 | ~£114 |
 | AWS Lightsail 2 GB | ~£9.5 | ~£114 |
 | DigitalOcean 2 GB | ~£14 | ~£168 |
