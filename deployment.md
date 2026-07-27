@@ -47,7 +47,7 @@ recommended **2 vCPU / 2 GB** tier.
 | **Contabo** | Cloud VPS 10 | 3 | 8 GB | 75 GB NVMe | 32 TB | **₹670** | ₹8,000 | London |
 | **OVHcloud** | VPS‑2 | 2 | 4 GB | 80 GB SSD | Unmetered* | **₹730** | ₹8,800 | London |
 | **IONOS** | VPS Linux M/L | 2 | 2–4 GB | 80 GB SSD | Unlimited | **₹450–780** (intro) | ₹5,400–9,400 | UK |
-| **Hostinger** | KVM 2 | 2 | 8 GB | 100 GB NVMe | 2 TB | **₹790** (intro) | ₹9,500 | UK (London) |
+| **Hostinger** | KVM 1 | 1 | 4 GB | 50 GB NVMe | 1 TB | **₹440** (intro) | ₹5,300 | UK (London) |
 | **Linode / Akamai** | Shared 2 GB | 1 | 2 GB | 50 GB SSD | 2 TB | **₹1,055** | ₹12,700 | London |
 | **Vultr** | Cloud Compute | 1 | 2 GB | 55 GB SSD | 2 TB | **₹1,055** | ₹12,700 | London |
 | **AWS Lightsail** | 2 GB plan | 2 | 2 GB | 60 GB SSD | 3 TB | **₹1,055** | ₹12,700 | London (eu‑west‑2) |
@@ -57,8 +57,8 @@ recommended **2 vCPU / 2 GB** tier.
 \* "Unmetered/unlimited" is subject to fair‑use policies.
 
 > **Intro vs. renewal (IONOS, Hostinger):** the low prices are **promotional** and require a
-> long upfront term (often **12–24 months**). They **renew 20–40% higher** — Hostinger's KVM 2
-> renews around **₹1,250/mo**. Budget for the renewal rate, not just the first term.
+> long upfront term (often **12–24 months**). They **renew 20–40% higher** — Hostinger's KVM 1
+> renews around **₹700/mo**. Budget for the renewal rate, not just the first term.
 
 > **Hetzner Cloud** is the European value leader (CX22: 2 vCPU / 4 GB ≈ **₹435/mo**) but has
 > **no UK datacenter** (Germany/Finland only). Exclude it if UK data residency or lowest UK
@@ -73,7 +73,7 @@ instance price — strongly recommended since the box holds customer data.
 |----------|------|-----|
 | ✅ Balance (default) | **Linode or Vultr, ~₹1,055/mo** | Clean tooling, snapshots, reliable London network |
 | Lowest cost, UK DC | **OVHcloud VPS‑2 (~₹730) / Contabo (~₹670)** | Big specs, cheap; shared/oversold CPU, slower support |
-| Generous RAM, intro price | **Hostinger KVM 2 (~₹790 intro)** | 2 vCPU / 8 GB, easy panel; watch the renewal jump + long‑term lock‑in |
+| Cheapest intro, UK DC | **Hostinger KVM 1 (~₹440 intro)** | 1 vCPU / 4 GB, easy panel; watch the renewal jump + long‑term lock‑in |
 | Smoothest ops | **DigitalOcean (~₹1,585)** | Best docs & managed‑DB upgrade path, ~50% pricier |
 
 ---
