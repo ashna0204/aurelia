@@ -156,15 +156,15 @@ export default function Footer() {
         </Modal>
       )}
 
-      <footer className="relative overflow-hidden bg-ink px-6 pt-20 pb-10 text-white/75">
+      <footer className="relative overflow-hidden bg-forestDeep border-t border-gold/15 px-6 pt-20 pb-10 text-cream/75">
         {/* The map motif again, at the faintest it appears anywhere on the
             site — enough to texture the block, not enough to compete. */}
         <WorldMap
           className="pointer-events-none absolute -top-8 right-0 w-[820px] max-w-none"
-          dotColor="#FFFFFF"
+          dotColor="#F5F0E8"
           dotOpacity={0.08}
-          highlightColor="#FFFFFF"
-          highlightOpacity={0.2}
+          highlightColor="var(--color-gold)"
+          highlightOpacity={0.25}
           highlightRegions={["southAsia", "gulf", "uk"]}
         />
 
@@ -173,12 +173,12 @@ export default function Footer() {
             <div className="max-w-[320px]">
               <div className="mb-5 flex items-center gap-3">
                 <span
-                  className="grid size-8 shrink-0 place-items-center rounded-full bg-white font-display text-[15px] font-bold text-ink"
+                  className="grid size-8 shrink-0 place-items-center rounded-full bg-gold font-display text-[15px] font-bold text-forestDeep"
                   aria-hidden="true"
                 >
                   A
                 </span>
-                <span className="font-display text-[17px] font-semibold tracking-[0.08em] text-white">
+                <span className="font-display text-[17px] font-semibold tracking-[0.08em] text-cream">
                   AURELIA LOGISTICS
                 </span>
               </div>
@@ -194,14 +194,14 @@ export default function Footer() {
             <nav aria-label="Footer" className="flex flex-wrap gap-x-14 gap-y-10">
               {cols.map((col) => (
                 <div key={col.title}>
-                  <h2 className="pre-header mb-5 text-white/65">{col.title}</h2>
+                  <h2 className="pre-header mb-5 text-gold">{col.title}</h2>
                   <ul className="space-y-3">
                     {col.links.map((link) => (
                       <li key={link.label}>
                         <button
                           type="button"
                           onClick={link.action}
-                          className="text-left text-sm text-white/75 transition-colors duration-200 hover:text-white"
+                          className="text-left text-sm text-cream/75 transition-colors duration-200 hover:text-gold"
                         >
                           {link.label}
                         </button>
@@ -214,18 +214,18 @@ export default function Footer() {
           </div>
 
           {/* ── Offices ── */}
-          <div className="mt-16 grid gap-8 border-t border-white/10 pt-12 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-16 grid gap-8 border-t border-gold/15 pt-12 sm:grid-cols-2 lg:grid-cols-4">
             {OFFICES.map((office) => (
               <div key={office.city}>
                 <div className="mb-3 flex items-center gap-2.5">
-                  <span className="size-1.5 shrink-0 rounded-full bg-teal" aria-hidden="true" />
-                  <span className="font-display text-lg font-semibold text-white">
+                  <span className="size-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true" />
+                  <span className="font-display text-lg font-semibold text-cream">
                     {office.city}
                   </span>
                 </div>
-                <p className="pre-header mb-2 text-white/65">{office.role}</p>
+                <p className="pre-header mb-2 text-gold/80">{office.role}</p>
                 {office.lines.map((line) => (
-                  <p key={line} className="text-sm leading-relaxed text-white/70">
+                  <p key={line} className="text-sm leading-relaxed text-cream/70">
                     {line}
                   </p>
                 ))}
@@ -233,11 +233,11 @@ export default function Footer() {
             ))}
           </div>
 
-          <div className="mt-14 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-6 text-[13px] text-white/65">
+          <div className="mt-14 flex flex-wrap items-center justify-between gap-3 border-t border-gold/15 pt-6 text-[13px] text-cream/65">
             <span>© 2026 Aurelia Logistics Ltd. All rights reserved.</span>
             <a
               href="mailto:enquiries@aurelialogistics.co.uk"
-              className="transition-colors duration-200 hover:text-white"
+              className="transition-colors duration-200 hover:text-gold"
             >
               enquiries@aurelialogistics.co.uk
             </a>

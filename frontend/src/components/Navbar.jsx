@@ -156,12 +156,12 @@ export default function Navbar() {
           aria-label="Aurelia Logistics — home"
         >
           <span
-            className="grid size-9 shrink-0 place-items-center rounded-full bg-ink font-display text-[17px] font-bold text-white"
+            className="grid size-9 shrink-0 place-items-center rounded-full bg-gold font-display text-[17px] font-bold text-forestDeep"
             aria-hidden="true"
           >
             A
           </span>
-          <span className="font-display text-[19px] font-semibold tracking-[0.08em] text-ink">
+          <span className="font-display text-[19px] font-semibold tracking-[0.08em] text-cream">
             AURELIA
           </span>
         </Link>
@@ -180,7 +180,7 @@ export default function Navbar() {
         <button
           type="button"
           onClick={() => setMenuOpen((open) => !open)}
-          className="grid size-10 place-items-center rounded-full border border-ink/10 text-ink md:hidden"
+          className="grid size-10 place-items-center rounded-full border border-gold/25 text-cream md:hidden"
           aria-expanded={menuOpen}
           aria-controls="mobile-nav"
           aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -193,7 +193,7 @@ export default function Navbar() {
         <nav
           id="mobile-nav"
           aria-label="Primary"
-          className="border-t border-ink/8 bg-bg/95 px-6 pt-2 pb-6 backdrop-blur-xl md:hidden"
+          className="border-t border-gold/15 bg-forestDeep/95 px-6 pt-2 pb-6 backdrop-blur-xl md:hidden"
         >
           {LINKS.map(({ label, to }) => (
             <a

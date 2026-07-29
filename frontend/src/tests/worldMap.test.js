@@ -69,18 +69,15 @@ describe('regions', () => {
 })
 
 describe('routes', () => {
-  it('starts the main lane at Kochi and bends through two segments', () => {
+  it('starts the corridor lane at Kochi and bends through three segments', () => {
     const kochi = project(PLACES.kochi.lon, PLACES.kochi.lat)
-    expect(ROUTES.main.d.startsWith(`M ${kochi.x.toFixed(1)} ${kochi.y.toFixed(1)}`)).toBe(true)
-    // Kochi → Dubai → London is two quadratic segments on one path, which is
-    // what lets the container follow it without jumping.
-    expect(ROUTES.main.d.match(/Q/g)).toHaveLength(2)
-    expect(ROUTES.coastal.d.match(/Q/g)).toHaveLength(1)
+    expect(ROUTES.corridor.d.startsWith(`M ${kochi.x.toFixed(1)} ${kochi.y.toFixed(1)}`)).toBe(true)
+    expect(ROUTES.corridor.d.match(/Q/g)).toHaveLength(3)
   })
 
-  it('ends the main lane at London', () => {
+  it('ends the corridor lane at London', () => {
     const london = project(PLACES.london.lon, PLACES.london.lat)
-    expect(ROUTES.main.d.endsWith(`${london.x.toFixed(1)} ${london.y.toFixed(1)}`)).toBe(true)
+    expect(ROUTES.corridor.d.endsWith(`${london.x.toFixed(1)} ${london.y.toFixed(1)}`)).toBe(true)
   })
 
   it('bows every lane above the straight chord between its endpoints', () => {
@@ -111,7 +108,7 @@ describe('dot grid', () => {
       [0, 0],
       [1, 2],
     ])
-    expect(d).toBe('M5 5h0M15 25h0')
+    expect(d).toBe('M2.5 2.5h0M7.5 12.5h0')
     expect(dotsPath([])).toBe('')
   })
 })

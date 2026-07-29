@@ -81,17 +81,17 @@ export default function ShippingContainer({ className = "", shadow = true, ...re
       <defs>
         {/* Top face catches the most light, the door end the least. */}
         <linearGradient id={id("top")} x1="0" y1="1" x2="1" y2="0">
-          <stop offset="0%" stopColor="#2A66A8" />
-          <stop offset="100%" stopColor="#3E82C6" />
+          <stop offset="0%" stopColor="#0A2E1C" />
+          <stop offset="100%" stopColor="#0E422A" />
         </linearGradient>
         <linearGradient id={id("side")} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#17599F" />
-          <stop offset="55%" stopColor="#0E4C92" />
-          <stop offset="100%" stopColor="#0A3D77" />
+          <stop offset="0%" stopColor="#0A2E1C" />
+          <stop offset="55%" stopColor="#071E12" />
+          <stop offset="100%" stopColor="#040F09" />
         </linearGradient>
         <linearGradient id={id("door")} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#0B3D78" />
-          <stop offset="100%" stopColor="#062A55" />
+          <stop offset="0%" stopColor="#071E12" />
+          <stop offset="100%" stopColor="#040F09" />
         </linearGradient>
         {/* Sheen sweeping down the long side, so the flat fill reads as steel. */}
         <linearGradient id={id("sheen")} x1="0" y1="0" x2="1" y2="0.4">
@@ -240,7 +240,7 @@ export default function ShippingContainer({ className = "", shadow = true, ...re
           add(C.farTop, { x: 0, y: RAIL }),
           add(C.nearTop, { x: 0, y: RAIL }),
         )}
-        fill="#0B4382"
+        fill="#0A2E1C"
       />
       <polygon
         points={quad(
@@ -249,7 +249,7 @@ export default function ShippingContainer({ className = "", shadow = true, ...re
           add(C.farBottom, { x: 0, y: -RAIL }),
           add(C.nearBottom, { x: 0, y: -RAIL }),
         )}
-        fill="#083463"
+        fill="#040F09"
       />
       <polygon
         points={quad(C.nearBottom, C.farBottom, C.farTop, C.nearTop)}
@@ -263,8 +263,8 @@ export default function ShippingContainer({ className = "", shadow = true, ...re
           fontSize="46"
           fontWeight="700"
           letterSpacing="5"
-          fill="#F4F7FB"
-          fillOpacity="0.94"
+          fill="#C8963E"
+          fillOpacity="0.95"
         >
           AURELIA
         </text>
@@ -274,8 +274,8 @@ export default function ShippingContainer({ className = "", shadow = true, ...re
           fontSize="13"
           fontWeight="500"
           letterSpacing="4.2"
-          fill="#CFE0F2"
-          fillOpacity="0.6"
+          fill="#F5F0E8"
+          fillOpacity="0.7"
         >
           LOGISTICS LTD · UNITED KINGDOM
         </text>
@@ -286,8 +286,8 @@ export default function ShippingContainer({ className = "", shadow = true, ...re
           fontSize="12"
           fontWeight="500"
           letterSpacing="2.6"
-          fill="#CFE0F2"
-          fillOpacity="0.45"
+          fill="#F5F0E8"
+          fillOpacity="0.5"
         >
           AURU 472019 3 · 40′ HC · MAX 30,480 KG
         </text>

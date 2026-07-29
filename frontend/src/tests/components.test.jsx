@@ -61,14 +61,13 @@ describe('WorldMap', () => {
     const { container } = render(
       <WorldMap
         highlightRegions={['southAsia', 'gulf', 'nowhere']}
-        routes={[ROUTES.main, ROUTES.coastal]}
+        routes={[ROUTES.corridor]}
         markers={['kochi', 'london', 'atlantis']}
         showLabels
         pulse
       />,
     )
-    expect(container.querySelector('#route-main')).toBeInTheDocument()
-    expect(container.querySelector('#route-coastal')).toBeInTheDocument()
+    expect(container.querySelector('#route-corridor')).toBeInTheDocument()
     expect(container.querySelectorAll('[data-marker]')).toHaveLength(2)
     // Kochi is the only place carrying a note, rendered beside its label.
     expect(container.textContent).toContain('KOCHI')

@@ -12,22 +12,29 @@
  */
 
 export const colors = {
-  // Surfaces
-  bg: "#F5F5F7",
-  surface: "#FFFFFF",
+  // Backgrounds (Greens)
+  forest: "#071E12",
+  forestDeep: "#040F09",
+  emerald: "#0A2E1C",
 
-  // Ink
-  ink: "#0B0F14",
-  inkSoft: "#5A6472",
+  // Accent (Gold)
+  gold: "#C8963E",
+  goldDeep: "#A67B2E",
 
-  // Accents
-  accent: "#0E4C92", // deep maritime blue
-  teal: "#0FA3A3", // supporting accent
-  gold: "#C8A24B", // micro-accent — ticks, Sahya
+  // Neutral
+  cream: "#F5F0E8",
 
   // Feedback
-  error: "#B3261E",
-  success: "#0F7A5A",
+  error: "#e07060",
+
+  // Functional / Legacy Aliases
+  bg: "#071E12",
+  surface: "#0A2E1C",
+  ink: "#F5F0E8",
+  inkSoft: "#C8963E",
+  accent: "#C8963E",
+  teal: "#0A2E1C",
+  success: "#0A2E1C",
 };
 
 export const fonts = {

@@ -5,11 +5,16 @@ import { colors, fonts, EASE_SOFT, GSAP_EASE } from '../theme'
 
 describe('theme tokens', () => {
   it('exposes the brand palette', () => {
-    expect(colors.accent).toBe('#0E4C92')
-    expect(colors.ink).toBe('#0B0F14')
-    expect(colors.bg).toBe('#F5F5F7')
-    expect(colors.gold).toBe('#C8A24B')
-    expect(colors.error).toBe('#B3261E')
+    expect(colors.forest).toBe('#071E12')
+    expect(colors.forestDeep).toBe('#040F09')
+    expect(colors.emerald).toBe('#0A2E1C')
+    expect(colors.gold).toBe('#C8963E')
+    expect(colors.goldDeep).toBe('#A67B2E')
+    expect(colors.cream).toBe('#F5F0E8')
+    expect(colors.error).toBe('#e07060')
+    expect(colors.accent).toBe('#C8963E')
+    expect(colors.bg).toBe('#071E12')
+    expect(colors.ink).toBe('#F5F0E8')
   })
 
   it('exposes the type families and easing', () => {
@@ -40,6 +45,11 @@ describe('theme tokens', () => {
       ['gold', colors.gold],
       ['error', colors.error],
       ['success', colors.success],
+      ['forest', colors.forest],
+      ['forest-deep', colors.forestDeep],
+      ['emerald', colors.emerald],
+      ['gold-deep', colors.goldDeep],
+      ['cream', colors.cream],
     ]
 
     for (const [name, value] of pairs) {

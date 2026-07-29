@@ -27,6 +27,7 @@ export function useSmartNavigate({ smoothScrollTop = true } = {}) {
   const location = useLocation();
 
   const scrollToAnchor = (hash) => {
+    if (typeof document === "undefined") return;
     const el = document.getElementById(hash);
     if (el) scrollTo(el);
   };

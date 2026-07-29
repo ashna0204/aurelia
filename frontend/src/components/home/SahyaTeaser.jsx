@@ -16,7 +16,7 @@ export default function SahyaTeaser() {
   return (
     <section className="bg-bg px-6 py-24 md:px-8 md:py-32">
       <Reveal className="mx-auto max-w-[1240px]">
-        <div className="card-soft overflow-hidden rounded-card-lg bg-gold/8 p-10 md:p-16">
+        <div className="card-soft overflow-hidden rounded-card-lg bg-emerald/60 border border-gold/25 p-10 md:p-16">
           <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
             <div>
               <SectionTag label="Aurelia · sister label" />
@@ -38,7 +38,7 @@ export default function SahyaTeaser() {
               </Link>
             </div>
 
-            <div className="rounded-card bg-surface p-8 shadow-soft">
+            <div className="rounded-card bg-forestDeep border border-gold/15 p-8 shadow-soft">
               <h3 className="pre-header">Where Sahya fits</h3>
               <ul className="mt-6 divide-y divide-ink/6">
                 {CHANNELS.map((channel) => (
