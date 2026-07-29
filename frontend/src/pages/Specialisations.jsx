@@ -1,132 +1,109 @@
-import { useNavigate } from "react-router-dom";
-import FadeIn from "../components/FadeIn";
-import SectionTag from "../components/SectionTag";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+import PageHero from "../components/PageHero";
+import CtaBand from "../components/CtaBand";
+import Reveal from "../components/Reveal";
+import { VERTICALS } from "../constants/verticals";
 
-const SECTORS = [
-  {
-    slug: "ethnic-food",
-    label: "Ethnic Food & Grocery",
-    tagline: "Celebrating heritage through authentic sourcing.",
-    desc: "38 authenticated product lines sourced directly from growers and processors across Kerala, Tamil Nadu, and Rajasthan. From staple grains to artisan condiments — and featuring Sahya, our B2C label for the specialty grocer and diaspora markets.",
-    stats: [{ v: "38", l: "Products" }, { v: "6", l: "Categories" }, { v: "Kerala", l: "Heartland" }],
-    bg: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=900&q=75",
-    accent: "#C8963E",
-  },
-  {
-    slug: "vehicle-parts",
-    label: "Vehicle Parts & Accessories",
-    tagline: "OEM-quality components. Reliable delivery.",
-    desc: "India is the world's third-largest automobile manufacturer. We connect buyers in Africa, the Middle East, and South-East Asia with certified Indian automotive suppliers — tyres, braking, engine components, electrical, filtration, and body parts.",
-    stats: [{ v: "6", l: "Categories" }, { v: "OEM", l: "Quality Standard" }, { v: "Global", l: "Reach" }],
-    bg: "https://images.unsplash.com/photo-1614027164847-1b28cfe1df60?w=900&q=75",
-    accent: "#8BA4C8",
-  },
-  {
-    slug: "pharmaceuticals",
-    label: "Pharmaceuticals & Healthcare",
-    tagline: "Temperature-controlled. Compliance-first.",
-    desc: "India supplies over 20% of the world's generic medicines. Aurelia sources from WHO-GMP and USFDA-certified manufacturers — finished formulations, Ayurvedic preparations, nutraceuticals, APIs, and medical consumables.",
-    stats: [{ v: "6", l: "Categories" }, { v: "WHO-GMP", l: "Certified" }, { v: "USFDA", l: "Approved Sources" }],
-    bg: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=900&q=75",
-    accent: "#7FC4A0",
-  },
-];
+/** Headline figures per vertical, shown alongside the description. */
+const STATS = {
+  "ethnic-food": [
+    { value: "38", label: "Products" },
+    { value: "6", label: "Categories" },
+    { value: "Kerala", label: "Heartland" },
+  ],
+  "vehicle-parts": [
+    { value: "6", label: "Categories" },
+    { value: "OEM", label: "Quality standard" },
+    { value: "Global", label: "Reach" },
+  ],
+  pharmaceuticals: [
+    { value: "6", label: "Categories" },
+    { value: "WHO-GMP", label: "Certified" },
+    { value: "USFDA", label: "Approved sources" },
+  ],
+};
 
 export default function Specialisations() {
-  const navigate = useNavigate();
-
   return (
-    <div style={{ background: "#071E12", minHeight: "100vh", paddingTop: 72 }}>
+    <>
+      <PageHero
+        eyebrow="Areas of specialisation"
+        title={
+          <>
+            Three sectors.
+            <br />
+            <span className="italic text-accent">Deep expertise.</span>
+          </>
+        }
+        intro="Aurelia Logistics operates across three distinct trade verticals — each backed by its own sourcing network, its own compliance knowledge, and years of on-the-ground relationships in South Asia."
+        highlightRegions={["southAsia", "gulf", "uk"]}
+      />
 
-      {/* Header */}
-      <section style={{ padding: "80px 24px 60px", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 30% 60%, rgba(200,150,62,0.06) 0%, transparent 60%)" }} />
-        <div style={{ maxWidth: 1120, margin: "0 auto", position: "relative" }}>
-          <FadeIn><SectionTag label="Areas of Specialisation" /></FadeIn>
-          <FadeIn delay={0.1}>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(32px, 5vw, 60px)", fontWeight: 700, color: "#F5F0E8", lineHeight: 1.1, margin: "0 0 20px" }}>
-              Three sectors.<br /><span style={{ color: "#C8963E", fontStyle: "italic" }}>Deep expertise.</span>
-            </h1>
-          </FadeIn>
-          <FadeIn delay={0.2}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, color: "rgba(245,240,232,0.5)", lineHeight: 1.75, maxWidth: 580 }}>
-              Aurelia Logistics operates across three distinct trade verticals — each backed by dedicated sourcing networks, compliance knowledge, and years of on-the-ground relationships in South Asia.
-            </p>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* Sector cards */}
-      <section style={{ padding: "0 24px 100px" }}>
-        <div style={{ maxWidth: 1120, margin: "0 auto", display: "flex", flexDirection: "column", gap: 32 }}>
-          {SECTORS.map((s, i) => (
-            <FadeIn key={s.slug} delay={i * 0.1}>
-              <div
-                onClick={() => navigate(`/specialisations/${s.slug}`)}
-                style={{
-                  borderRadius: 12, overflow: "hidden", cursor: "pointer",
-                  display: "grid", gridTemplateColumns: i % 2 === 0 ? "1fr 1.2fr" : "1.2fr 1fr",
-                  minHeight: 340,
-                  background: "rgba(245,240,232,0.03)",
-                  border: "1px solid rgba(245,240,232,0.06)",
-                  transition: "all 0.5s cubic-bezier(0.22,1,0.36,1)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(200,150,62,0.2)";
-                  e.currentTarget.style.boxShadow = "0 16px 56px rgba(0,0,0,0.4)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(245,240,232,0.06)";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-                className="spec-card"
+      <section className="bg-bg px-6 pb-24 md:px-8 md:pb-32">
+        <div className="mx-auto flex max-w-[1240px] flex-col gap-6">
+          {VERTICALS.map((vertical, index) => (
+            <Reveal key={vertical.key}>
+              <Link
+                to={vertical.slug}
+                className="card-soft card-soft-hover group grid min-w-0 gap-10 rounded-card-lg p-8 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] md:p-12"
               >
-                {/* Image — swap order for odd rows */}
-                {i % 2 !== 0 && (
-                  <div style={{ position: "relative", overflow: "hidden" }}>
-                    <img src={s.bg} alt={s.label} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, transparent 60%, rgba(7,30,18,0.7))" }} />
-                  </div>
-                )}
-
-                {/* Content */}
-                <div style={{ padding: "48px 52px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(200,150,62,0.6)", letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 16 }}>
-                    Specialisation {String(i + 1).padStart(2, "0")}
-                  </div>
-                  <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(22px, 2.8vw, 34px)", fontWeight: 700, color: "#F5F0E8", margin: "0 0 10px", lineHeight: 1.2 }}>
-                    {s.label}
+                <div>
+                  <p className="pre-header">
+                    Specialisation {String(index + 1).padStart(2, "0")}
+                  </p>
+                  <h2 className="mt-5 font-display text-[clamp(1.5rem,2.6vw,2.25rem)] leading-tight font-semibold text-ink">
+                    {vertical.label}
                   </h2>
-                  <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 15, color: "#C8963E", fontStyle: "italic", margin: "0 0 20px" }}>{s.tagline}</p>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "rgba(245,240,232,0.45)", lineHeight: 1.75, margin: "0 0 32px" }}>{s.desc}</p>
-
-                  <div style={{ display: "flex", gap: 32, marginBottom: 32 }}>
-                    {s.stats.map((st, j) => (
-                      <div key={j}>
-                        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: s.accent, fontWeight: 700 }}>{st.v}</div>
-                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)", letterSpacing: "0.16em", textTransform: "uppercase", marginTop: 2 }}>{st.l}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: 10, color: "#C8963E", fontFamily: "'DM Sans', sans-serif", fontSize: 12, letterSpacing: "0.16em", textTransform: "uppercase" }}>
-                    <span>Explore {s.label}</span>
-                    <span style={{ fontSize: 16 }}>→</span>
-                  </div>
+                  <p className="mt-2 font-display text-[17px] italic text-accent">
+                    {vertical.tagline}
+                  </p>
+                  <p className="mt-6 max-w-[560px] text-[15px] leading-relaxed text-ink-soft">
+                    {vertical.description}
+                  </p>
+                  <span className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-ink">
+                    Explore {vertical.label}
+                    <ArrowRight
+                      size={15}
+                      strokeWidth={1.75}
+                      aria-hidden="true"
+                      className="transition-transform duration-300 group-hover:translate-x-1"
+                    />
+                  </span>
                 </div>
 
-                {/* Image — even rows (right side) */}
-                {i % 2 === 0 && (
-                  <div style={{ position: "relative", overflow: "hidden" }}>
-                    <img src={s.bg} alt={s.label} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to left, transparent 60%, rgba(7,30,18,0.7))" }} />
-                  </div>
-                )}
-              </div>
-            </FadeIn>
+                <div className="flex flex-col justify-between gap-8 border-ink/6 md:border-l md:pl-10">
+                  <dl className="space-y-6">
+                    {STATS[vertical.key].map((stat) => (
+                      // Column-reverse so the figure reads above its label
+                      // while `dt` still precedes `dd` in the DOM, which is
+                      // what a definition list actually requires.
+                      <div key={stat.label} className="flex flex-col-reverse">
+                        <dt className="pre-header mt-1.5">{stat.label}</dt>
+                        <dd className="font-display text-3xl leading-none font-bold text-ink">
+                          {stat.value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                  <ul className="flex flex-wrap gap-2">
+                    {vertical.tags.map((tag) => (
+                      <li key={tag} className="pill cursor-default px-3 py-1.5 text-[12px]">
+                        {tag}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </Link>
+            </Reveal>
           ))}
         </div>
       </section>
-    </div>
+
+      <CtaBand
+        heading="Not sure which vertical fits?"
+        body="Describe what you are sourcing and we will route it to the right desk — or across more than one, in a single consolidated consignment."
+      />
+    </>
   );
 }

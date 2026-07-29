@@ -19,12 +19,17 @@ describe('routing', () => {
 
   it('renders the home page at /', () => {
     renderAt('/')
-    expect(h1Text()).toMatch(/meets opportunity/)
+    expect(h1Text()).toMatch(/Sourcing the World/)
+  })
+
+  it('wraps the routed pages in a main landmark', () => {
+    renderAt('/')
+    expect(screen.getByRole('main')).toBeInTheDocument()
   })
 
   it('renders the quote page at /quote', () => {
     renderAt('/quote')
-    expect(h1Text()).toMatch(/Tell us what/)
+    expect(h1Text()).toMatch(/Tell us what you/)
   })
 
   it('renders the specialisations index', () => {
@@ -56,10 +61,10 @@ describe('routing', () => {
     const user = userEvent.setup()
     renderAt('/')
 
-    const nav = screen.getByRole('navigation')
-    await user.click(within(nav).getByRole('link', { name: 'Quote' }))
+    const [nav] = screen.getAllByRole('navigation', { name: 'Primary' })
+    await user.click(within(nav).getByRole('link', { name: 'Request Quote' }))
 
-    expect(h1Text()).toMatch(/Tell us what/)
+    expect(h1Text()).toMatch(/Tell us what you/)
   })
 
   it('navigates home from the 404 page', async () => {
@@ -67,6 +72,6 @@ describe('routing', () => {
     renderAt('/nowhere')
 
     await user.click(screen.getByRole('link', { name: /Back to Home/i }))
-    expect(h1Text()).toMatch(/meets opportunity/)
+    expect(h1Text()).toMatch(/Sourcing the World/)
   })
 })

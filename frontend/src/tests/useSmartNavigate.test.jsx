@@ -45,7 +45,7 @@ describe('useSmartNavigate', () => {
     await user.click(screen.getByRole('button', { name: 'go' }))
 
     expect(screen.getByTestId('path')).toHaveTextContent('/')
-    expect(spy).toHaveBeenCalledWith({ behavior: 'smooth' })
+    expect(spy).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' })
   })
 
   it('navigates then scrolls for a cross-page anchor', async () => {
@@ -63,6 +63,6 @@ describe('useSmartNavigate', () => {
     renderHarness('/specialisations', { opts: { smoothScrollTop: false } })
 
     await user.click(screen.getByRole('button', { name: 'go' }))
-    expect(spy).toHaveBeenCalledWith({ top: 0 })
+    expect(spy).toHaveBeenCalledWith({ top: 0, behavior: 'auto' })
   })
 })

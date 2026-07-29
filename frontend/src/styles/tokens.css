@@ -1,0 +1,71 @@
+/**
+ * Design tokens — the single source of truth for the Aurelia palette, type
+ * scale, surfaces and easing.
+ *
+ * Declared in Tailwind v4's `@theme` block, which does two things at once:
+ * emits each entry as a real CSS custom property on `:root`, and generates the
+ * matching utility classes (`bg-bg`, `text-ink-soft`, `shadow-soft`, …). So a
+ * component can reach a token either way, and there is still only one place to
+ * change it.
+ *
+ * The short aliases below (`--bg`, `--ink`, …) exist for hand-written CSS and
+ * inline SVG `stroke`/`fill` attributes, where the long namespaced name reads
+ * poorly. They are aliases, never independent values.
+ */
+
+@theme {
+  /* ── Colour ─────────────────────────────────────────────────────────── */
+  --color-bg: #f5f5f7; /* page background */
+  --color-surface: #ffffff; /* cards */
+  --color-ink: #0b0f14; /* near-black text, dark CTA/footer background */
+  --color-ink-soft: #5a6472; /* secondary text */
+  --color-accent: #0e4c92; /* deep maritime blue — routes, active pills */
+  --color-teal: #0fa3a3; /* supporting accent */
+  --color-gold: #c8a24b; /* micro-accent: ticks, Sahya */
+  --color-error: #b3261e;
+  --color-success: #0f7a5a;
+
+  /* ── Type ───────────────────────────────────────────────────────────── */
+  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* Fluid display scale. Every headline on the site is one of these five
+     steps — named rather than repeated as an arbitrary `clamp()` at each call
+     site, so the ladder stays a ladder and a change to one rung reaches every
+     page that stands on it. Line height is left to the call site, which is
+     where the copy is. */
+  --text-hero: clamp(2.5rem, 6vw, 5.5rem); /* the home hero, once per site */
+  --text-display: clamp(2.25rem, 5vw, 4rem); /* every other page's <h1> */
+  --text-section: clamp(2rem, 4vw, 3.5rem); /* section <h2> */
+  --text-subsection: clamp(1.75rem, 3.5vw, 2.75rem); /* secondary <h2> */
+  --text-cta: clamp(1.75rem, 4vw, 3.5rem); /* the ink CTA blocks */
+
+  /* ── Surfaces ───────────────────────────────────────────────────────── */
+  --radius-card: 24px;
+  --radius-card-lg: 32px;
+
+  /* Two-layer shadow: a tight contact shadow plus a wide ambient one. The
+     pair is what makes a flat white rectangle read as a lifted surface. */
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px rgb(11 15 20 / 0.08);
+  --shadow-soft-lg: 0 2px 4px rgb(0 0 0 / 0.05), 0 24px 56px rgb(11 15 20 / 0.14);
+  --shadow-dock: 0 2px 8px rgb(11 15 20 / 0.06), 0 18px 44px rgb(11 15 20 / 0.12);
+
+  /* ── Motion ─────────────────────────────────────────────────────────── */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* ── Layout ─────────────────────────────────────────────────────────── */
+  --spacing-header: 76px; /* sticky header height; pages offset by this */
+}
+
+/**
+ * Short aliases. Same values, friendlier names for raw CSS and SVG attributes.
+ */
+:root {
+  --bg: var(--color-bg);
+  --surface: var(--color-surface);
+  --ink: var(--color-ink);
+  --ink-soft: var(--color-ink-soft);
+  --accent: var(--color-accent);
+  --teal: var(--color-teal);
+  --gold: var(--color-gold);
+}

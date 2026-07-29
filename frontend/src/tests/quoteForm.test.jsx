@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { server } from './server'
@@ -84,7 +84,7 @@ describe('QuotePage — submission', () => {
 
     // The success screen echoes the chosen sector and offers a way home.
     expect(screen.getByText('Sector: Ethnic Food & Grocery')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /Back to Home/i }))
+    await user.click(screen.getByRole('link', { name: /Back to Home/i }))
   })
 
   it('blocks a suspiciously fast submission (anti-bot speed bump)', async () => {

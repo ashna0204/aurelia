@@ -1,19 +1,26 @@
-export default function SectionTag({ label, light }) {
+/**
+ * The small uppercase line that opens a section — "GLOBAL TRADE, HANDLED
+ * END-TO-END".
+ *
+ * Rendered as a paragraph rather than a heading on purpose: it labels the
+ * headline that follows, it is not a level in the document outline, and
+ * promoting it to an `<h*>` would add a rung to that ladder in every section.
+ *
+ * The gold tick is one of the only two places gold appears outside the Sahya
+ * material.
+ *
+ * @param {object}  props
+ * @param {string}  props.label
+ * @param {boolean} [props.onDark] invert for the ink-coloured sections
+ */
+export default function SectionTag({ label, onDark = false, className = "" }) {
   return (
-    <div style={{
-      display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 20,
-      padding: "7px 18px",
-      border: light ? "1px solid rgba(7,30,18,0.15)" : "1px solid rgba(200,150,62,0.25)",
-      borderRadius: 40,
-    }}>
-      <span style={{ width: 5, height: 5, borderRadius: "50%", background: light ? "#0A2E1C" : "#C8963E", flexShrink: 0 }} />
-      <span style={{
-        fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 500,
-        color: light ? "rgba(7,30,18,0.5)" : "rgba(245,240,232,0.55)",
-        letterSpacing: "0.2em", textTransform: "uppercase",
-      }}>
-        {label}
-      </span>
-    </div>
+    <p className={`pre-header flex items-center gap-3 ${onDark ? "text-white/75" : ""} ${className}`}>
+      <span
+        className={`inline-block h-px w-6 shrink-0 ${onDark ? "bg-white/35" : "bg-gold"}`}
+        aria-hidden="true"
+      />
+      {label}
+    </p>
   );
 }

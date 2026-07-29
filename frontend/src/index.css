@@ -1,25 +1,321 @@
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body { overflow-x: hidden; background: #071E12; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-::selection { background: rgba(200,150,62,0.28); color: #0A2E1C; }
+@import "tailwindcss";
+@import "./styles/tokens.css";
 
-@keyframes float0 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-18px); } }
-@keyframes float1 { 0%,100% { transform: translateY(0) translateX(0); } 50% { transform: translateY(-13px) translateX(8px); } }
-@keyframes float2 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-22px); } }
+/* ─────────────────────────────────────────────────────────────────────────
+   Base
+   ───────────────────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    /* Native smooth scroll is the fallback for reduced-motion users and for
+       the moment before Lenis boots. Lenis disables it via .lenis-smooth. */
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
 
-input::placeholder, textarea::placeholder { color: rgba(245,240,232,0.22); }
-select option { background: #0D2A1A; color: #F5F0E8; }
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-@media (max-width: 768px) {
-  .desk-nav { display: none !important; }
-  .mob-menu-btn { display: flex !important; }
-  .about-grid,
-  .contact-grid,
-  .sahya-grid,
-  .brand-compare { grid-template-columns: 1fr !important; gap: 40px !important; }
-  .spec-card { grid-template-columns: 1fr !important; }
-  .spec-card > div:last-child { display: none; }
+  /* In-page anchors must clear the sticky header. */
+  [id] {
+    scroll-margin-top: calc(var(--spacing-header) + 16px);
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+    color: var(--color-ink);
+  }
+
+  /* One visible focus treatment everywhere, in the brand accent. Applied on
+     :focus-visible only, so pointer users never see a ring they didn't ask
+     for while keyboard users always do. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: color-mix(in srgb, var(--color-ink-soft) 55%, transparent);
+  }
 }
-@media (min-width: 769px) {
-  .mob-menu { display: none !important; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Lenis — required for the smooth-scroll wrapper to size correctly.
+   ───────────────────────────────────────────────────────────────────────── */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Components
+   ───────────────────────────────────────────────────────────────────────── */
+@layer components {
+  /* Small uppercase label that opens a section. */
+  .pre-header {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+  }
+
+  /* Soft-UI card: layered shadow, generous radius, lift on hover. */
+  .card-soft {
+    background: var(--color-surface);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+    transition:
+      transform 300ms var(--ease-soft),
+      box-shadow 300ms var(--ease-soft);
+  }
+
+  .card-soft-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-soft-lg);
+  }
+
+  /* Pill: filter chips, nav links, the vertical dock. */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 10%, transparent);
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--color-ink-soft);
+    background: transparent;
+    cursor: pointer;
+    transition:
+      color 250ms var(--ease-soft),
+      background-color 250ms var(--ease-soft),
+      border-color 250ms var(--ease-soft),
+      transform 250ms var(--ease-soft),
+      box-shadow 250ms var(--ease-soft);
+  }
+
+  .pill:hover {
+    color: var(--color-ink);
+    border-color: color-mix(in srgb, var(--color-ink) 22%, transparent);
+  }
+
+  .pill[data-active="true"] {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: #fff;
+  }
+
+  /* Filled primary action. */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 9999px;
+    background: var(--color-ink);
+    color: #fff;
+    padding: 15px 30px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      transform 300ms var(--ease-soft),
+      box-shadow 300ms var(--ease-soft),
+      background-color 300ms var(--ease-soft);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgb(11 15 20 / 0.22);
+  }
+
+  .btn-primary:disabled {
+    cursor: progress;
+    background: var(--color-ink-soft);
+  }
+
+  /* Ghost / secondary action. */
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 16%, transparent);
+    background: transparent;
+    color: var(--color-ink);
+    padding: 14px 29px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      transform 300ms var(--ease-soft),
+      border-color 300ms var(--ease-soft),
+      background-color 300ms var(--ease-soft);
+  }
+
+  .btn-ghost:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--color-ink) 34%, transparent);
+    background: color-mix(in srgb, var(--color-ink) 4%, transparent);
+  }
+
+  /* Form control shared by both forms. */
+  .field {
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+    background: var(--color-bg);
+    padding: 13px 16px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    color: var(--color-ink);
+    transition:
+      border-color 200ms var(--ease-soft),
+      box-shadow 200ms var(--ease-soft),
+      background-color 200ms var(--ease-soft);
+  }
+
+  .field:focus {
+    outline: none;
+    background: var(--color-surface);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 18%, transparent);
+  }
+
+  .field[aria-invalid="true"] {
+    border-color: var(--color-error);
+  }
+
+  .field[aria-invalid="true"]:focus {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 18%, transparent);
+  }
+
+  /**
+   * Honeypot field on the quote form.
+   *
+   * Positioned off-screen rather than `display: none`: a bot filling every
+   * input it can find will fill this one, but it is unreachable by pointer,
+   * keyboard and screen reader alike. Any value in it makes the server discard
+   * the submission.
+   */
+  .honeypot {
+    position: absolute;
+    top: 0;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Fades a horizontally scrolling strip into the page at both ends. */
+  .marquee-fade {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 8%,
+      black 92%,
+      transparent
+    );
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Utilities
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Infinite marquee: the track holds two identical copies of the content, so
+   translating it exactly -50% lands on a seamless repeat. */
+@keyframes marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@utility marquee-track {
+  animation: marquee-scroll var(--marquee-duration, 38s) linear infinite;
+}
+
+@keyframes node-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  70% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+@utility node-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: node-pulse 2.8s var(--ease-soft) infinite;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Reduced motion — the belt to the JS braces.
+
+   Every scroll-driven effect is also gated in JS (Lenis, ScrollTrigger and
+   the entrance timelines all bail out), because CSS alone cannot stop a
+   GSAP tween. This block is what catches the purely declarative ones:
+   the marquee, the map pulses and the hover lifts.
+   ───────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .card-soft-hover:hover,
+  .btn-primary:hover:not(:disabled),
+  .btn-ghost:hover {
+    transform: none;
+  }
 }

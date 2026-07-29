@@ -1,44 +1,38 @@
 import { Link } from "react-router-dom";
-import FadeIn from "../components/FadeIn";
+import Reveal from "../components/Reveal";
 import SectionTag from "../components/SectionTag";
+import WorldMap from "../components/WorldMap";
 
 export default function NotFound() {
   return (
-    <div style={{ background: "#071E12", minHeight: "100vh", paddingTop: 72, display: "flex", alignItems: "center" }}>
-      <section style={{ padding: "80px 24px 120px", width: "100%" }}>
-        <div style={{ maxWidth: 780, margin: "0 auto" }}>
-          <FadeIn><SectionTag label="Error 404" /></FadeIn>
-          <FadeIn delay={0.1}>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(30px, 4.5vw, 52px)", fontWeight: 700, color: "#F5F0E8", lineHeight: 1.1, margin: "0 0 16px" }}>
-              This page has<br />gone <span style={{ color: "#C8963E", fontStyle: "italic" }}>astray.</span>
-            </h1>
-          </FadeIn>
-          <FadeIn delay={0.15}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "rgba(245,240,232,0.42)", lineHeight: 1.75, margin: "0 0 40px", maxWidth: 480 }}>
-              The page you're looking for doesn't exist or has been moved. Let's get you back on route.
-            </p>
-          </FadeIn>
-          <FadeIn delay={0.2}>
-            <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-              <Link to="/" style={{
-                fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, textDecoration: "none",
-                padding: "15px 36px", background: "linear-gradient(135deg, #C8963E, #A67B2E)",
-                color: "#071E12", borderRadius: 3, letterSpacing: "0.15em", textTransform: "uppercase",
-              }}>
-                Back to Home
-              </Link>
-              <Link to="/specialisations" style={{
-                fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, textDecoration: "none",
-                padding: "15px 36px", background: "transparent", color: "#C8963E",
-                border: "1px solid rgba(200,150,62,0.3)", borderRadius: 3,
-                letterSpacing: "0.15em", textTransform: "uppercase",
-              }}>
-                Our Specialisations
-              </Link>
-            </div>
-          </FadeIn>
-        </div>
-      </section>
+    <div className="relative flex min-h-svh items-center overflow-hidden bg-bg px-6 pt-header pb-24 md:px-8">
+      <WorldMap
+        className="pointer-events-none absolute inset-x-0 top-1/2 w-full -translate-y-1/2"
+        dotOpacity={0.06}
+      />
+
+      <div className="relative mx-auto w-full max-w-[820px]">
+        <Reveal stagger={0.1}>
+          <SectionTag label="Error 404" />
+          <h1
+            className="mt-5 font-display text-display font-bold leading-[1.04] tracking-[-0.02em] text-ink"
+          >
+            This page has gone <span className="italic text-accent">astray.</span>
+          </h1>
+          <p className="mt-6 max-w-[480px] text-[17px] leading-relaxed text-ink-soft">
+            The page you&rsquo;re looking for doesn&rsquo;t exist or has been moved. Let&rsquo;s get
+            you back on route.
+          </p>
+          <div className="mt-9 flex flex-wrap gap-3">
+            <Link to="/" className="btn-primary">
+              Back to Home
+            </Link>
+            <Link to="/specialisations" className="btn-ghost">
+              Our Specialisations
+            </Link>
+          </div>
+        </Reveal>
+      </div>
     </div>
   );
 }
