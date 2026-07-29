@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 // Delay before scrolling to an in-page anchor after a cross-route navigation,
@@ -20,6 +21,11 @@ export function useSmartNavigate({ smoothScrollTop = true } = {}) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Cancel any pending anchor-scroll timers on unmount so they can't fire
+  // against a torn-down document.
+  const timers = useRef([]);
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+
   const scrollToAnchor = (hash) =>
     document.getElementById(hash)?.scrollIntoView({ behavior: "smooth" });
 
@@ -29,7 +35,7 @@ export function useSmartNavigate({ smoothScrollTop = true } = {}) {
       const targetPath = path || "/";
       if (location.pathname !== targetPath) {
         navigate(targetPath);
-        setTimeout(() => scrollToAnchor(hash), ANCHOR_SCROLL_DELAY);
+        timers.current.push(setTimeout(() => scrollToAnchor(hash), ANCHOR_SCROLL_DELAY));
       } else {
         scrollToAnchor(hash);
       }
