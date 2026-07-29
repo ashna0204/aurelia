@@ -20,8 +20,8 @@ export default function DarkCTA() {
           <WorldMap
             className="pointer-events-none absolute inset-x-0 top-1/2 w-full -translate-y-1/2"
             dotColor="#FFFFFF"
-            dotOpacity={0.05}
-            routes={[ROUTES.main, ROUTES.coastal]}
+            dotOpacity={0.07}
+            routes={[ROUTES.corridor]}
             routeColor="#FFFFFF"
             routeOpacity={0.16}
           />

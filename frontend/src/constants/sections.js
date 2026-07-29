@@ -21,10 +21,10 @@ export const HERO_SLOT_ID = "hero-container-slot";
  *
  * The "pin" is CSS `position: sticky`, not a ScrollTrigger pin. ScrollTrigger's
  * pin works by wrapping the element in a spacer it inserts at refresh time,
- * which lands *after* first paint and shoves a viewport and a half of content
- * down the page — a layout shift of well over 1.0. Sticky costs nothing: the
- * section is 250svh tall from the very first frame (100svh of frame plus
- * 150svh of scroll to travel through it), and the frame sticks inside it.
+ * which lands *after* first paint and shoves three viewports of content down
+ * the page — a layout shift of well over 1.0. Sticky costs nothing: the
+ * section is 400svh tall from the very first frame (100svh of frame plus the
+ * three viewports of scroll spent crossing it), and the frame sticks inside.
  *
  * If the section's height class changes, the scrub range changes with it.
  */

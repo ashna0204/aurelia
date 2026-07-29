@@ -124,7 +124,8 @@ export default function QuotePage() {
       <WorldMap
         className="pointer-events-none absolute -top-24 right-0 w-[900px] max-w-none"
         highlightRegions={["southAsia", "gulf", "uk"]}
-        dotOpacity={0.06}
+        dotOpacity={0.14}
+        highlightOpacity={0.3}
       />
 
       <div className="relative mx-auto max-w-[820px]">

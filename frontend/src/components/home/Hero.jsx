@@ -52,14 +52,22 @@ export default function Hero() {
       ref={rootRef}
       className="relative flex min-h-svh flex-col justify-center overflow-hidden bg-bg pt-header"
     >
-      {/* ── Background: the world, at a whisper ── */}
+      {/* ── The stage: the world, legibly ──
+          Not a watermark. The land sits back in `--ink-soft`, the three
+          operating regions come forward in full-strength `--ink` on larger
+          dots, and the four offices pulse. The trade geography is meant to
+          read before a word of the headline does. */}
       <div ref={mapRef} className="pointer-events-none absolute inset-0 flex items-center">
         <WorldMap
           className="w-full"
           highlightRegions={["southAsia", "gulf", "uk"]}
           markers={["kochi", "mumbai", "dubai", "london"]}
           pulse
-          dotOpacity={0.07}
+          dotOpacity={0.32}
+          dotRadius={1.2}
+          highlightColor="var(--accent)"
+          highlightRadius={1.6}
+          highlightOpacity={0.85}
         />
       </div>
 

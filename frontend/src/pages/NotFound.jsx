@@ -8,7 +8,7 @@ export default function NotFound() {
     <div className="relative flex min-h-svh items-center overflow-hidden bg-bg px-6 pt-header pb-24 md:px-8">
       <WorldMap
         className="pointer-events-none absolute inset-x-0 top-1/2 w-full -translate-y-1/2"
-        dotOpacity={0.06}
+        dotOpacity={0.12}
       />
 
       <div className="relative mx-auto w-full max-w-[820px]">

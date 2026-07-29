@@ -10,8 +10,15 @@
 
 import { GRID_COLS, GRID_ROWS } from "../data/worldDots";
 
-/** One dot-grid cell, in viewBox units. All other geometry follows from it. */
-export const CELL = 10;
+/**
+ * One dot-grid cell, in viewBox units. All other geometry follows from it.
+ *
+ * Derived so the viewBox stays 1100 × 410 whatever the grid density: at 220
+ * columns that is 5 units per cell. Holding the viewBox fixed means route
+ * paths, city positions and framing windows are all unaffected by a change
+ * in dot resolution.
+ */
+export const CELL = 1100 / GRID_COLS;
 export const VIEW_W = GRID_COLS * CELL; // 1100
 export const VIEW_H = GRID_ROWS * CELL; // 410
 
@@ -106,23 +113,86 @@ export function routePath(keys, bow = 0.16) {
   );
 }
 
+/** The offices the trade lane runs through, in travel order. */
+export const CORRIDOR_STOPS = ["kochi", "mumbai", "dubai", "london"];
+
 /**
- * The two trade lanes the home page animates.
+ * The `pathLength` every route declares, and therefore the units its
+ * `strokeDasharray`/`strokeDashoffset` are counted in.
  *
- * `main` is deliberately a single continuous path: the container in the
- * signature scroll animation follows it with MotionPathPlugin, and a path
- * split into segments would make it jump between them.
+ * Normalising to 1 would be the obvious choice, and it is wrong: GSAP rounds
+ * pixel-unit CSS values to whole numbers, so a dash offset tweened from 1 to 0
+ * only ever renders 1 or 0 and the lane snaps from undrawn to fully drawn at
+ * the halfway point. A thousand units gives a thousand steps, which is far
+ * more than any screen can show — and the maths stays as simple as 0…1 was,
+ * just scaled.
+ */
+export const ROUTE_PATH_LENGTH = 1000;
+
+/**
+ * The trade lane, as one continuous path.
+ *
+ * Deliberately not split into segments: the container in the signature scroll
+ * animation follows this path with MotionPathPlugin, and a path made of
+ * separate segments would make it jump between them.
  */
 export const ROUTES = {
-  main: { id: "route-main", d: routePath(["kochi", "dubai", "london"]), width: 2 },
-  coastal: { id: "route-coastal", d: routePath(["kochi", "mumbai"], 0.3), width: 1.4 },
+  corridor: { id: "route-corridor", d: routePath(CORRIDOR_STOPS), width: 2.4 },
 };
 
 /**
+ * How far along the lane each stop sits, as a fraction of the whole.
+ *
+ * Measured on the straight chords between stops rather than on the drawn
+ * arcs. The arcs are barely bowed, so the two agree to well under a percent —
+ * and this way the figures are available at module load, without needing an
+ * SVG in a document to measure against. They are what lets a node's label pop
+ * at the moment the container arrives rather than at some fixed time.
+ */
+export const CORRIDOR_STOP_PROGRESS = (() => {
+  const points = CORRIDOR_STOPS.map((key) => project(PLACES[key].lon, PLACES[key].lat));
+  const legs = points.slice(1).map((p, i) => Math.hypot(p.x - points[i].x, p.y - points[i].y));
+  const total = legs.reduce((sum, leg) => sum + leg, 0);
+
+  let travelled = 0;
+  return CORRIDOR_STOPS.map((key, i) => {
+    if (i > 0) travelled += legs[i - 1];
+    return { key, progress: travelled / total };
+  });
+})();
+
+/**
+ * Framing windows, as longitude/latitude bounds.
+ *
+ * `corridor` crops to the London–Kochi trade lane so the container's traverse
+ * spans most of the frame's width instead of creeping across a fifth of a
+ * whole-world map. The projection is untouched — this is a viewBox crop, so
+ * every dot and every city stays exactly where geography puts it.
+ */
+export const WINDOWS = {
+  world: { lon: [-180, 180], lat: [-56, 78] },
+  corridor: { lon: [-32, 98], lat: [-2, 60] },
+};
+
+/** A framing window → the SVG viewBox rectangle that shows it. */
+export function viewBoxFor(window) {
+  const [lonMin, lonMax] = window.lon;
+  const [latMin, latMax] = window.lat;
+  const topLeft = project(lonMin, latMax);
+  const bottomRight = project(lonMax, latMin);
+  return {
+    x: topLeft.x,
+    y: topLeft.y,
+    width: bottomRight.x - topLeft.x,
+    height: bottomRight.y - topLeft.y,
+  };
+}
+
+/**
  * Dots as one `<path>` of zero-length subpaths with a round line cap — the
- * SVG spec renders each as a disc. 1,395 dots therefore cost one DOM node
- * instead of 1,395 `<circle>`s, which is the difference between a map that
- * can be animated and one that janks.
+ * SVG spec renders each as a disc. The 5,707 land cells therefore cost one
+ * DOM node instead of 5,707 `<circle>`s, which is the difference between a
+ * map that can be animated and one that janks.
  */
 export function dotsPath(cells) {
   return cells.map(([col, row]) => `M${col * CELL + CELL / 2} ${row * CELL + CELL / 2}h0`).join("");

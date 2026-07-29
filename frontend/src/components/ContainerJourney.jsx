@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import ShippingContainer from "./ShippingContainer";
 import { gsap, ScrollTrigger } from "../lib/gsap";
 import { useDesktopMotion } from "../hooks/useMediaQuery";
-import { PLACES, project, VIEW_W } from "../lib/worldMap";
+import { CORRIDOR_STOPS, PLACES, ROUTES, project } from "../lib/worldMap";
 import {
   HERO_SLOT_ID,
   PIN_TRIGGER_ID,
@@ -12,19 +12,32 @@ import {
 } from "../constants/sections";
 
 /** How many points to sample off the route path for the motion path. */
-const ROUTE_SAMPLES = 60;
+const ROUTE_SAMPLES = 72;
 /** Scale the container settles at once it docks onto the map. */
-const DOCKED_SCALE = 0.35;
+const DOCKED_SCALE = 0.4;
+/** How much of a viewport the container takes to leave frame at the end. */
+const EXIT_VIEWPORTS = 0.6;
 
 /**
- * Convert a point in the map's SVG user space to viewport pixels, given where
- * the map sits on screen while its section is pinned.
+ * Convert a point in the map's SVG user space to viewport pixels.
+ *
+ * The map is cropped to the trade corridor, so its viewBox does not start at
+ * the origin — the offset has to come out before the scale goes on, or every
+ * waypoint lands a continent away.
  */
 function toViewport(point, frame) {
   return {
-    x: frame.left + point.x * frame.scale,
-    y: frame.top + point.y * frame.scale,
+    x: frame.left + (point.x - frame.viewBox.x) * frame.scale,
+    y: frame.top + (point.y - frame.viewBox.y) * frame.scale,
   };
+}
+
+/** Read an SVG's viewBox as numbers. */
+function readViewBox(svg) {
+  const parts = (svg.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number);
+  if (parts.length !== 4 || parts.some(Number.isNaN)) return null;
+  const [x, y, width, height] = parts;
+  return width > 0 && height > 0 ? { x, y, width, height } : null;
 }
 
 /**
@@ -44,7 +57,9 @@ function measure() {
   const frame = document.getElementById(TRADE_MAP_STICKY_ID);
   const verticals = document.getElementById(VERTICALS_ID);
   const pin = ScrollTrigger.getById(PIN_TRIGGER_ID);
-  const route = document.getElementById("route-main");
+  // Read the id off the route definition rather than repeating the string:
+  // a rename would otherwise silently stop the journey from measuring.
+  const route = document.getElementById(ROUTES.corridor.id);
 
   if (!slot || !map || !frame || !verticals || !pin || !route) return null;
   // jsdom and other non-rendering environments have no path geometry.
@@ -66,15 +81,26 @@ function measure() {
   // Where the map ends up while the section is stuck. The frame sticks to
   // `top: 0`, so the map's offset *inside* the frame — which never changes —
   // is its on-screen offset for the whole of the sticky phase.
+  const viewBox = readViewBox(map);
+  if (!viewBox) return null;
+
   const mapRect = map.getBoundingClientRect();
   const frameRect = frame.getBoundingClientRect();
   const mapFrame = {
     left: mapRect.left,
     top: mapRect.top - frameRect.top,
-    scale: mapRect.width / VIEW_W,
+    scale: mapRect.width / viewBox.width,
+    viewBox,
   };
 
-  const kochi = toViewport(project(PLACES.kochi.lon, PLACES.kochi.lat), mapFrame);
+  // The first stop on the lane is where the container docks before it starts
+  // travelling — read from the corridor rather than named here, so the two
+  // cannot disagree about where the journey begins.
+  const originKey = CORRIDOR_STOPS[0];
+  const origin = toViewport(
+    project(PLACES[originKey].lon, PLACES[originKey].lat),
+    mapFrame,
+  );
 
   // Sample the same path the route line draws, so the container leads the
   // stroke instead of merely running alongside it.
@@ -84,25 +110,26 @@ function measure() {
     return toViewport(point, mapFrame);
   });
 
-  // Phase boundaries, in scroll pixels. The pin's own measured start and end
-  // are the authority — see PIN_TRIGGER_ID.
-  // The exit finishes well before the verticals cards are in view, so the
-  // container is gone by the time there is anything for it to sit on top of.
+  // Phase boundaries, in scroll pixels. The sticky section's own measured
+  // start and end are the authority — see PIN_TRIGGER_ID. The container
+  // leaves frame just after the section releases, well before the verticals
+  // grid arrives.
   const start = 0;
-  const end = Math.max(
-    verticals.getBoundingClientRect().top + scrollY - window.innerHeight * 0.75,
-    pin.end + 1,
+  const exitDistance = window.innerHeight * EXIT_VIEWPORTS;
+  const end = Math.min(
+    pin.end + exitDistance,
+    Math.max(verticals.getBoundingClientRect().top + scrollY, pin.end + 1),
   );
 
   return {
     heroStage,
-    kochi,
+    origin,
     path,
     end,
     // Durations in arbitrary timeline units, made proportional to the real
-    // scroll distance each phase covers. Without this the travel phase would
-    // not line up with the pin, and the container would reach London while
-    // the map was still drawing.
+    // scroll distance each phase covers. Without this the traverse would not
+    // line up with the sticky range, and the container would reach London
+    // while the lane was still drawing.
     approach: Math.max(pin.start - start, 1),
     travel: Math.max(pin.end - pin.start, 1),
     exit: Math.max(end - pin.end, 1),
@@ -111,16 +138,28 @@ function measure() {
 
 /**
  * The signature animation: one shipping container that travels with the
- * reader from the hero, down onto Kochi, along the trade lane to London, and
- * out of the page at the verticals grid.
+ * reader from the hero, down onto Kochi, across the trade corridor to London,
+ * and out of frame.
  *
- * It is a single fixed layer driven by one scrubbed master timeline, so the
+ * A single fixed layer driven by one scrubbed master timeline, so the
  * container survives every section boundary it crosses. Everything animated
  * is `transform` or `opacity`, and the hero reserves the container's space
  * with a fixed aspect ratio, so none of this can move layout.
  *
- * Below 768px, and whenever reduced motion is requested, this renders nothing
- * and the hero draws a static container in the slot instead.
+ * **On the direction of travel.** The brief asks for a left-to-right
+ * traverse. The four offices are Kochi (76°E), Mumbai (73°E), Dubai (55°E)
+ * and London (0°) — a monotonically *westward* run, which on any faithful map
+ * reads right-to-left. Honouring "left-to-right" literally would mean either
+ * mirroring the world or reversing the story into London → Kochi, and the
+ * same paragraph of the brief names Kochi as the origin and London as the
+ * destination. Geography settles it: the traverse runs right-to-left, with
+ * the horizontal component of the motion roughly twice the vertical, so it
+ * still reads as a journey across the map. To flip it, reverse
+ * CORRIDOR_STOPS in lib/worldMap and mirror the frame.
+ *
+ * Below 768px, and whenever reduced motion is requested, this renders nothing:
+ * the hero draws a static container in its slot and the trade-lane section
+ * parks one at Kochi.
  */
 export default function ContainerJourney() {
   const layerRef = useRef(null);
@@ -181,13 +220,13 @@ export default function ContainerJourney() {
           },
         });
 
-        // 1 · Hero → Kochi. Shrinks, tilts as if under a crane, and settles
-        //     level on the node.
+        // 1 · Hero → the origin node. Shrinks, tilts as if under a crane, and
+        //     settles level on Kochi ready to depart.
         tl.to(
           craftRef.current,
           {
-            x: stage.kochi.x,
-            y: stage.kochi.y,
+            x: stage.origin.x,
+            y: stage.origin.y,
             scale: DOCKED_SCALE,
             duration: stage.approach,
             ease: "power1.inOut",
@@ -199,15 +238,18 @@ export default function ContainerJourney() {
           0,
         );
 
-        // 2 · Along the lane, in step with the line drawing beneath it.
+        // 2 · The traverse. Sampled off the same path the lane draws, so the
+        //     container leads the stroke rather than trailing it, and passes
+        //     over each office at the moment that office lights up.
         tl.to(craftRef.current, {
           duration: stage.travel,
+          ease: "none",
           motionPath: { path: stage.path, curviness: 1, autoRotate: false },
         });
 
-        // 3 · Out. The remaining sections carry the map motif alone.
+        // 3 · Out of frame as the section releases.
         tl.to(craftRef.current, {
-          scale: DOCKED_SCALE * 0.55,
+          scale: DOCKED_SCALE * 0.7,
           autoAlpha: 0,
           duration: stage.exit,
           ease: "power2.in",

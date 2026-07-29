@@ -162,7 +162,9 @@ export default function Footer() {
         <WorldMap
           className="pointer-events-none absolute -top-8 right-0 w-[820px] max-w-none"
           dotColor="#FFFFFF"
-          dotOpacity={0.06}
+          dotOpacity={0.08}
+          highlightColor="#FFFFFF"
+          highlightOpacity={0.2}
           highlightRegions={["southAsia", "gulf", "uk"]}
         />
 

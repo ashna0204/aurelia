@@ -26,7 +26,8 @@ export default function PageHero({ eyebrow, title, intro, back, highlightRegions
       <WorldMap
         className="pointer-events-none absolute -top-16 right-0 w-[900px] max-w-none"
         highlightRegions={highlightRegions}
-        dotOpacity={0.06}
+        dotOpacity={0.14}
+        highlightOpacity={0.3}
       />
 
       <div className="relative mx-auto max-w-[1240px]">
