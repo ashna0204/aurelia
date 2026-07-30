@@ -75,10 +75,10 @@ export default function Hero() {
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, rgba(4,15,9,0.9) 0%, rgba(7,30,18,0.55) 50%, rgba(4,15,9,0.85) 100%)" }} />
       <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 25% 60%, rgba(200,150,62,0.07) 0%, transparent 55%)" }} />
 
-      <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "120px 24px 80px", maxWidth: 920, margin: "0 auto" }}>
+      <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "clamp(60px, 9vh, 120px) 24px clamp(32px, 5vh, 80px)", maxWidth: 920, margin: "0 auto" }}>
 
         <div style={anim(0.15)}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 12, marginBottom: 36, padding: "7px 20px", border: "1px solid rgba(200,150,62,0.28)", borderRadius: 40 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 12, marginBottom: "clamp(12px, 2.2vh, 36px)", padding: "7px 20px", border: "1px solid rgba(200,150,62,0.28)", borderRadius: 40 }}>
             <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#C8963E" }} />
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 500, color: "rgba(245,240,232,0.65)", letterSpacing: "0.24em", textTransform: "uppercase" }}>
               UK-Registered Global Trade Facilitator
@@ -88,9 +88,9 @@ export default function Hero() {
 
         <h1 style={{
           fontFamily: "'Playfair Display', serif",
-          fontSize: "clamp(38px, 6.5vw, 76px)",
+          fontSize: "clamp(36px, min(6.5vw, 7.5vh), 76px)",
           fontWeight: 700, color: "#F5F0E8", lineHeight: 1.08,
-          margin: "0 0 32px",
+          margin: "0 0 clamp(12px, 2.2vh, 32px)",
           ...anim(0.3),
         }}>
           Where Origin<br />
@@ -101,7 +101,7 @@ export default function Hero() {
           fontFamily: "'DM Sans', sans-serif",
           fontSize: "clamp(16px, 1.9vw, 19px)",
           color: "rgba(245,240,232,0.6)", lineHeight: 1.75,
-          maxWidth: 600, margin: "0 auto 52px",
+          maxWidth: 600, margin: "0 auto clamp(18px, 3vh, 52px)",
           ...anim(0.48),
         }}>
           Aurelia Logistics connects the finest goods from South Asia with global markets — across ethnic foods, vehicle components, and pharmaceutical supplies.
@@ -114,10 +114,12 @@ export default function Hero() {
         <div
           id={HERO_SLOT_ID}
           style={{
-            margin: "0 auto 40px",
+            margin: "0 auto clamp(14px, 2.2vh, 40px)",
             aspectRatio: "640 / 330",
             width: "100%",
-            maxWidth: "min(460px, 62vw)",
+            // Also capped by viewport height so the whole hero — container and
+            // the buttons beneath it — stays above the fold on short laptops.
+            maxWidth: "min(620px, 78vw, calc(34vh * 640 / 330))",
             ...anim(0.55),
           }}
         >
