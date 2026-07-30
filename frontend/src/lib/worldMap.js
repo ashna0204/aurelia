@@ -121,12 +121,14 @@ export function routePath(keys, bow = 0.16) {
 /**
  * The offices the signature traveling container visits, in travel order.
  *
- * Kochi → Dubai → London is the "one custody chain" the container itself
- * traces — the other five places sit on branches off this spine (see
- * BRANCH_ROUTES) that draw in on scroll but are never themselves the
- * container's path, because a single continuous MotionPath cannot fork.
+ * London → Dubai → Kochi → Singapore → Sydney is the "one custody chain" the
+ * container itself traces — ordered north to south (descending latitude) so
+ * the container reads as travelling top-to-bottom down the map. The other
+ * three places sit on branches off this spine (see BRANCH_ROUTES) that draw
+ * in on scroll but are never themselves the container's path, because a
+ * single continuous MotionPath cannot fork.
  */
-export const CORRIDOR_STOPS = ["kochi", "dubai", "london"];
+export const CORRIDOR_STOPS = ["london", "dubai", "kochi", "singapore", "sydney"];
 
 /**
  * The `pathLength` every route declares, and therefore the units its
@@ -153,18 +155,16 @@ export const ROUTES = {
 };
 
 /**
- * The six background branches off the two hubs — every leg the home page's
- * map already drew before this port, just plotted on the real projection
- * instead of hand-tuned SVG beziers. Each carries the `[start, end]` window
- * (as a fraction of the pinned section's scroll range) it already drew
- * across, so the order branches light up in is unchanged.
+ * The three background branches off the two hubs — the legs to the places the
+ * corridor itself does not visit, plotted on the real projection. Each carries
+ * the `[start, end]` window (as a fraction of the pinned section's scroll
+ * range) it draws across, so the order branches light up in is deterministic.
  *
- * Not container-followed: only the corridor above is.
+ * Not container-followed: only the corridor above is. Singapore and Sydney are
+ * on the corridor now, so they are no longer branch destinations.
  */
 export const BRANCH_ROUTES = [
   { id: "branch-dubai-rotterdam", from: "dubai", to: "rotterdam", width: 1.0, range: [0.22, 0.4] },
-  { id: "branch-kochi-singapore", from: "kochi", to: "singapore", width: 1.5, range: [0.28, 0.44] },
-  { id: "branch-singapore-sydney", from: "singapore", to: "sydney", width: 1.0, range: [0.4, 0.54] },
   { id: "branch-kochi-newyork", from: "kochi", to: "newYork", width: 1.0, range: [0.36, 0.56] },
   { id: "branch-dubai-nairobi", from: "dubai", to: "nairobi", width: 0.8, range: [0.44, 0.58] },
 ].map((branch) => ({ ...branch, d: routePath([branch.from, branch.to]) }));
@@ -207,10 +207,15 @@ export const BRANCH_STOP_PROGRESS = BRANCH_ROUTES.map((branch) => ({
  * corner of a whole-world map. The projection is untouched — this is a
  * viewBox crop, so every dot and every city stays exactly where geography
  * puts it.
+ *
+ * The northern edge carries extra headroom (up to 78°N) on purpose: the
+ * pinned section's map sits under a fixed navbar, and without the sky above
+ * them London and Rotterdam — the northernmost places — would tuck up behind
+ * it. The padding drops them clear of the bar.
  */
 export const WINDOWS = {
   world: { lon: [-180, 180], lat: [-56, 78] },
-  network: { lon: [-95, 168], lat: [-45, 63] },
+  network: { lon: [-95, 168], lat: [-45, 78] },
 };
 
 /** A framing window → the SVG viewBox rectangle that shows it. */

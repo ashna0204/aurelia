@@ -101,7 +101,7 @@ describe('ContainerJourney measurement', () => {
 
     // jsdom does not implement SVG path geometry at all, so these have to be
     // defined rather than spied on. A straight 1000-unit path stands in for
-    // the Kochi → Dubai → London corridor.
+    // the London → … → Sydney corridor.
     SVGElement.prototype.getTotalLength = () => 1000
     SVGElement.prototype.getPointAtLength = (len) => ({
       x: 783 - (len / 1000) * 233,

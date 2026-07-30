@@ -48,7 +48,7 @@ describe('projection', () => {
     }
   })
 
-  it('orders the corridor west to east: London, Dubai, Kochi', () => {
+  it('projects London west of Dubai west of Kochi, and London north of Kochi', () => {
     const kochi = project(PLACES.kochi.lon, PLACES.kochi.lat)
     const london = project(PLACES.london.lon, PLACES.london.lat)
     const dubai = project(PLACES.dubai.lon, PLACES.dubai.lat)
@@ -73,23 +73,30 @@ describe('regions', () => {
 })
 
 describe('the main corridor', () => {
-  it('is Kochi, Dubai, London — the three the container itself visits', () => {
-    expect(CORRIDOR_STOPS).toEqual(['kochi', 'dubai', 'london'])
+  it('is London → Dubai → Kochi → Singapore → Sydney — the five the container visits', () => {
+    expect(CORRIDOR_STOPS).toEqual(['london', 'dubai', 'kochi', 'singapore', 'sydney'])
   })
 
-  it('starts at Kochi and bends through two segments', () => {
-    const kochi = project(PLACES.kochi.lon, PLACES.kochi.lat)
-    expect(ROUTES.corridor.d.startsWith(`M ${kochi.x.toFixed(1)} ${kochi.y.toFixed(1)}`)).toBe(
+  it('is ordered strictly north to south, so the container reads top-to-bottom', () => {
+    const lats = CORRIDOR_STOPS.map((key) => PLACES[key].lat)
+    for (let i = 1; i < lats.length; i += 1) {
+      expect(lats[i]).toBeLessThan(lats[i - 1])
+    }
+  })
+
+  it('starts at London and bends through four segments', () => {
+    const london = project(PLACES.london.lon, PLACES.london.lat)
+    expect(ROUTES.corridor.d.startsWith(`M ${london.x.toFixed(1)} ${london.y.toFixed(1)}`)).toBe(
       true,
     )
-    // Kochi → Dubai → London is two quadratic segments on one path, which is
-    // what lets the container follow it without jumping.
-    expect(ROUTES.corridor.d.match(/Q/g)).toHaveLength(2)
+    // Four quadratic segments on one continuous path, which is what lets the
+    // container follow it without jumping between legs.
+    expect(ROUTES.corridor.d.match(/Q/g)).toHaveLength(4)
   })
 
-  it('ends at London', () => {
-    const london = project(PLACES.london.lon, PLACES.london.lat)
-    expect(ROUTES.corridor.d.endsWith(`${london.x.toFixed(1)} ${london.y.toFixed(1)}`)).toBe(true)
+  it('ends at Sydney', () => {
+    const sydney = project(PLACES.sydney.lon, PLACES.sydney.lat)
+    expect(ROUTES.corridor.d.endsWith(`${sydney.x.toFixed(1)} ${sydney.y.toFixed(1)}`)).toBe(true)
   })
 
   it('bows above the straight chord between its endpoints', () => {
@@ -105,9 +112,9 @@ describe('the main corridor', () => {
 })
 
 describe('branch routes', () => {
-  it('covers the five destinations off the two hubs, each a single arc', () => {
+  it('covers the three destinations off the two hubs, each a single arc', () => {
     const destinations = BRANCH_ROUTES.map((b) => b.to).sort()
-    expect(destinations).toEqual(['nairobi', 'newYork', 'rotterdam', 'singapore', 'sydney'])
+    expect(destinations).toEqual(['nairobi', 'newYork', 'rotterdam'])
     for (const branch of BRANCH_ROUTES) {
       expect(branch.d.match(/Q/g)).toHaveLength(1)
       const from = project(PLACES[branch.from].lon, PLACES[branch.from].lat)
@@ -115,10 +122,11 @@ describe('branch routes', () => {
     }
   })
 
-  it('never follows the corridor hubs as its own destination', () => {
+  it('never follows a corridor stop as its own destination', () => {
     const destinations = BRANCH_ROUTES.map((b) => b.to)
-    expect(destinations).not.toContain('kochi')
-    expect(destinations).not.toContain('dubai')
+    for (const stop of CORRIDOR_STOPS) {
+      expect(destinations).not.toContain(stop)
+    }
   })
 })
 

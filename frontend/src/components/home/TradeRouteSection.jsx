@@ -3,8 +3,7 @@ import WorldMap from "../WorldMap";
 import ShippingContainer from "../ShippingContainer";
 import {
   BRANCH_ROUTES,
-  BRANCH_STOP_PROGRESS,
-  CORRIDOR_STOP_PROGRESS,
+  CORRIDOR_STOPS,
   PLACES,
   ROUTES,
   ROUTE_PATH_LENGTH,
@@ -60,7 +59,8 @@ function percentPos(place, frame) {
  *
  * Under reduced motion, and on anything narrower than 768px, none of this is
  * built: every line renders fully drawn, every label and badge is visible,
- * and a container sits parked at Kochi. Static, complete, no scroll tricks.
+ * and a container sits parked at the corridor's first stop. Static, complete,
+ * no scroll tricks.
  */
 export default function TradeRouteSection() {
   const sectionRef = useRef(null);
@@ -72,9 +72,8 @@ export default function TradeRouteSection() {
     if (!section || !animate) return undefined;
 
     const ctx = gsap.context(() => {
-      const markers = gsap.utils.toArray("[data-marker]");
-
-      gsap.set(markers, { opacity: 0, scale: 0.4, transformOrigin: "center" });
+      // Every place marker is visible from the start; only the lanes, badges
+      // and copy animate in on scroll.
       gsap.set("[data-badge]", { opacity: 0 });
       gsap.set("[data-phase='origin']", { opacity: 0 });
       gsap.set("[data-phase='sectors'] > *", { opacity: 0, y: 16 });
@@ -115,23 +114,6 @@ export default function TradeRouteSection() {
           { strokeDashoffset: ROUTE_PATH_LENGTH },
           { strokeDashoffset: 0, duration: end - start, ease: "none" },
           start,
-        );
-      }
-
-      // Hub/corridor nodes light as the container arrives at them.
-      for (const { key, progress } of CORRIDOR_STOP_PROGRESS) {
-        tl.to(
-          `[data-marker='${key}']`,
-          { opacity: 1, scale: 1, duration: 0.12, ease: "back.out(2.2)" },
-          progress,
-        );
-      }
-      // Branch destinations light as their own line finishes drawing.
-      for (const { key, progress } of BRANCH_STOP_PROGRESS) {
-        tl.to(
-          `[data-marker='${key}']`,
-          { opacity: 1, scale: 1, duration: 0.12, ease: "back.out(2.2)" },
-          progress,
         );
       }
 
@@ -335,7 +317,7 @@ function MapStage({ frame, animate }) {
           </div>
         );
       })}
-      {animate ? null : <ParkedContainer place="kochi" frame={frame} />}
+      {animate ? null : <ParkedContainer place={CORRIDOR_STOPS[0]} frame={frame} />}
     </>
   );
 }

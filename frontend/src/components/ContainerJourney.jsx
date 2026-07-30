@@ -138,19 +138,20 @@ function measure() {
 
 /**
  * The signature animation: one shipping container that travels with the
- * reader from the hero, down onto Kochi, across to Dubai and on to London,
- * and out of frame.
+ * reader from the hero, down onto London, and on through Dubai, Kochi and
+ * Singapore to Sydney, then out of frame.
  *
  * A single fixed layer driven by one scrubbed master timeline, so the
  * container survives every section boundary it crosses. Everything animated
  * is `transform` or `opacity`, and the hero reserves the container's space
  * with a fixed aspect ratio, so none of this can move layout.
  *
- * The corridor runs Kochi → Dubai → London — westward, which on a faithful
- * map reads right-to-left. The five other places on the map (Rotterdam, New
- * York, Singapore, Sydney, Nairobi) sit on branches off this spine that draw
- * in on their own schedule; the travelling container only ever follows the
- * corridor, because a single continuous motion path cannot fork.
+ * The corridor runs London → Dubai → Kochi → Singapore → Sydney — ordered
+ * north to south, so on a faithful map it reads top-to-bottom. The three
+ * other places on the map (Rotterdam, New York, Nairobi) sit on branches off
+ * this spine that draw in on their own schedule; the travelling container
+ * only ever follows the corridor, because a single continuous motion path
+ * cannot fork.
  *
  * Below 768px, and whenever reduced motion is requested, this renders nothing:
  * the hero draws a static container in its slot and the trade-route section
@@ -236,19 +237,38 @@ export default function ContainerJourney() {
         // 2 · The traverse. Sampled off the same path the lane draws, so the
         //     container leads the stroke rather than trailing it, and passes
         //     over each office at the moment that office lights up.
-        tl.to(craftRef.current, {
-          duration: stage.travel,
-          ease: "none",
-          motionPath: { path: stage.path, curviness: 1, autoRotate: false },
-        });
+        tl.to(
+          craftRef.current,
+          {
+            duration: stage.travel,
+            ease: "none",
+            motionPath: { path: stage.path, curviness: 1, autoRotate: false },
+          },
+          stage.approach,
+        );
 
-        // 3 · Out of frame as the section releases.
-        tl.to(craftRef.current, {
-          scale: DOCKED_SCALE * 0.7,
-          autoAlpha: 0,
-          duration: stage.exit,
-          ease: "power2.in",
-        });
+        // 3 · Vanish at the final stop. The container fades out across the last
+        //     stretch of the traverse so it disappears just as it settles on
+        //     Sydney, while the map is still pinned — rather than holding at a
+        //     fixed viewport spot and fading as the section releases and the
+        //     map scrolls up out from under it.
+        //
+        //     A plain opacity fade at a steady scale, deliberately not
+        //     `autoAlpha`. Two things made this shimmer before: animating scale
+        //     re-rasterised the container's fine corrugation ribs at shifting
+        //     sub-pixel sizes, and `autoAlpha` toggles `visibility` at the
+        //     zero-opacity boundary, which pops under a scrubbed playhead.
+        //     Fading opacity alone composites smoothly the whole way to nothing.
+        const vanish = stage.travel * 0.22;
+        tl.to(
+          craftRef.current,
+          { opacity: 0, duration: vanish, ease: "power2.out" },
+          stage.approach + stage.travel - vanish,
+        );
+        // Hold the now-invisible container through the release, so the scrubbed
+        // timeline still spans the trigger's full range and the traverse stays
+        // keyed to the pin.
+        tl.set(craftRef.current, { opacity: 0 }, stage.approach + stage.travel + stage.exit);
       }, layerRef);
     };
 
