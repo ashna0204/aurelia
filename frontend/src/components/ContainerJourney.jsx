@@ -209,7 +209,10 @@ export default function ContainerJourney() {
             // they are keyed to.
             start: 0,
             end: () => stage.end,
-            scrub: 1,
+            // Higher scrub = the container eases toward the scroll-derived
+            // position over ~2s rather than tracking it 1:1, so the traverse
+            // glides and settles smoothly instead of darting with the wheel.
+            scrub: 2,
             invalidateOnRefresh: true,
             // Measured after the pin, which changes the document height.
             refreshPriority: -1,
