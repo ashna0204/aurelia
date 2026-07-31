@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSmartNavigate } from "../hooks/useSmartNavigate";
+import Logo from "./Logo";
 
 const LINKS = [
   { label: "Home", to: "/" },
@@ -97,10 +98,11 @@ export default function Navbar() {
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 28px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 72 }}>
 
         <Link to="/" onClick={() => window.scrollTo({ top: 0 })} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg, #C8963E, #8B6914)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <span style={{ color: "#F5F0E8", fontSize: 17, fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>A</span>
-          </div>
-          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 19, fontWeight: 600, color: "#F5F0E8", letterSpacing: "0.06em" }}>AURELIA</span>
+          <Logo size={60} style={{ flexShrink: 0 }} />
+          {/* Brand wordmark — Concept E from aurelia-logos.html: Cinzel, house
+              gold, uppercase with wide tracking. px size scaled down from the
+              prototype (30) to sit in the 72px bar. */}
+          <span style={{ fontFamily: "'Cinzel', serif", fontWeight: 600, fontSize: 20, letterSpacing: "0.42em", textTransform: "uppercase", color: "#E8C547" }}>AURELIA</span>
         </Link>
 
         <div style={{ display: "flex", gap: 32, alignItems: "center" }} className="desk-nav">

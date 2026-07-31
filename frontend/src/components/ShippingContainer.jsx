@@ -258,13 +258,13 @@ export default function ShippingContainer({ className = "", style, shadow = true
       />
 
       {/* ── Markings ── */}
-      <g transform={`translate(150 ${C.farBottom.y - 118}) skewY(${SIDE_SKEW.toFixed(2)})`}>
+      <g transform={`translate(150 ${C.farBottom.y - 76}) skewY(${SIDE_SKEW.toFixed(2)})`}>
         <text
-          fontFamily="'Playfair Display', serif"
+          fontFamily="'Cinzel', serif"
           fontSize="46"
-          fontWeight="700"
-          letterSpacing="5"
-          fill="#F5F0E8"
+          fontWeight="600"
+          letterSpacing="8"
+          fill="#E8C547"
           fillOpacity="0.94"
         >
           AURELIA
