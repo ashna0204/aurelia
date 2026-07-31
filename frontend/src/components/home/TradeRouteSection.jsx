@@ -72,8 +72,8 @@ export default function TradeRouteSection() {
     if (!section || !animate) return undefined;
 
     const ctx = gsap.context(() => {
-      // Every place marker is visible from the start; only the lanes, badges
-      // and copy animate in on scroll.
+      // Every place marker is visible from the start; the copy starts hidden
+      // only so it can fade in once as the section pins (see below).
       gsap.set("[data-badge]", { opacity: 0 });
       gsap.set("[data-phase='origin']", { opacity: 0 });
       gsap.set("[data-phase='sectors'] > *", { opacity: 0, y: 16 });
@@ -117,26 +117,23 @@ export default function TradeRouteSection() {
         );
       }
 
-      // Origin line: in early, out before the sector list arrives.
-      tl.to("[data-phase='origin']", { opacity: 1, duration: 0.1 }, 0.02)
-        .to("[data-phase='origin']", { opacity: 0, duration: 0.12 }, 0.52);
-
-      // Sector list: in as the branches finish, out before the stats.
-      tl.to(
-        "[data-phase='sectors'] > *",
-        { opacity: 1, y: 0, duration: 0.14, stagger: 0.08, ease: "power2.out" },
-        0.58,
-      ).to("[data-phase='sectors'] > *", { opacity: 0, duration: 0.11 }, 0.84);
-
-      // Sector badges pop alongside the sector list.
-      tl.to("[data-badge]", { opacity: 1, duration: 0.17 }, 0.65);
-
-      // Stats settle in last.
+      // All copy fades in together as the section pins and then stays for the
+      // whole scroll — origin line, sector list, stats and the map badges each
+      // get equal billing. The earlier design cycled them (each phase faded
+      // out before the next faded in) so only one block was ever on screen and
+      // most were missed at any given scroll position.
+      tl.to("[data-phase='origin']", { opacity: 1, duration: 0.08 }, 0.02);
       tl.to(
         "[data-phase='stats'] > *",
-        { opacity: 1, duration: 0.11, stagger: 0.06 },
-        0.86,
+        { opacity: 1, duration: 0.08, stagger: 0.03 },
+        0.04,
       );
+      tl.to(
+        "[data-phase='sectors'] > *",
+        { opacity: 1, y: 0, duration: 0.1, stagger: 0.04, ease: "power2.out" },
+        0.06,
+      );
+      tl.to("[data-badge]", { opacity: 1, duration: 0.1 }, 0.08);
     }, sectionRef);
 
     return () => ctx.revert();

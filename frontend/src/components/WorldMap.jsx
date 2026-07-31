@@ -177,16 +177,17 @@ export default function WorldMap({
                 y={y + place.dy * detailScale}
                 textAnchor={place.anchor}
                 fill="#F5F0E8"
-                fontSize={13 * detailScale}
+                opacity={0.7}
+                fontSize={8.5 * detailScale}
                 fontFamily="'DM Sans', sans-serif"
-                fontWeight="500"
-                letterSpacing={1.4 * detailScale}
+                fontWeight="400"
+                letterSpacing={1.1 * detailScale}
                 // A halo in the section's own background colour, painted
                 // behind the glyphs. The operating regions are a dense field
                 // of dots and a city name laid straight onto them is
                 // unreadable.
                 stroke={labelHalo}
-                strokeWidth={4 * detailScale}
+                strokeWidth={3 * detailScale}
                 strokeLinejoin="round"
                 paintOrder="stroke"
               >
