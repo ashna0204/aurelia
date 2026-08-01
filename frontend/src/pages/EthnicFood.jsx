@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import FadeIn from "../components/FadeIn";
 import SectionTag from "../components/SectionTag";
 import { ETHNIC_FOOD_CATEGORIES } from "../data";
+import spicesImg from "../assets/spices.jpg";
 
 /* ─── Sahya Brand Feature ─── */
 function SahyaFeature() {
@@ -202,8 +203,8 @@ export default function EthnicFood() {
     <div style={{ paddingTop: 72 }}>
       {/* Page hero */}
       <section style={{ background: "#071E12", padding: "80px 24px 70px", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, background: "url('https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=1600&q=70') center/cover no-repeat", opacity: 0.15 }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(7,30,18,0.7), rgba(7,30,18,0.95))" }} />
+        <div style={{ position: "absolute", inset: 0, background: `url(${spicesImg}) center/cover no-repeat`, opacity: 0.3 }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(7,30,18,0.7), rgba(7,30,18,0.95))" }} />        <div style={{ position: "absolute", inset: 0, background: `url(${spicesImg}) center/cover no-repeat`, opacity: 0.3 }} />
         <div style={{ maxWidth: 1120, margin: "0 auto", position: "relative" }}>
           <button onClick={() => navigate("/specialisations")} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(200,150,62,0.7)", background: "none", border: "none", cursor: "pointer", letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 24, padding: 0 }}>
             ← Specialisations

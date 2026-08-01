@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import FadeIn from "../components/FadeIn";
 import SectionTag from "../components/SectionTag";
 import { PHARMA_CATEGORIES } from "../data";
+import pharmaImg from "../assets/pharma.jpg";
 
 export default function Pharmaceuticals() {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ export default function Pharmaceuticals() {
     <div style={{ paddingTop: 72 }}>
       {/* Hero */}
       <section style={{ background: BG, padding: "80px 24px 70px", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, background: "url('https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=1600&q=70') center/cover no-repeat", opacity: 0.1 }} />
+        <div style={{ position: "absolute", inset: 0, background: `url(${pharmaImg}) center/cover no-repeat`, opacity: 0.38 }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(7,24,16,0.8), rgba(7,24,16,0.97))" }} />
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 20% 50%, rgba(127,196,160,0.05) 0%, transparent 60%)" }} />
         <div style={{ maxWidth: 1120, margin: "0 auto", position: "relative" }}>

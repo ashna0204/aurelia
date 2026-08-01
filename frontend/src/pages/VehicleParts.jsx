@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import FadeIn from "../components/FadeIn";
 import SectionTag from "../components/SectionTag";
 import { VEHICLE_PARTS_CATEGORIES } from "../data";
+import autopartImg from "../assets/autopart.jpg";
 
 export default function VehicleParts() {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ export default function VehicleParts() {
     <div style={{ paddingTop: 72 }}>
       {/* Hero */}
       <section style={{ background: "#0B1A28", padding: "80px 24px 70px", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, background: "url('https://images.unsplash.com/photo-1614027164847-1b28cfe1df60?w=1600&q=70') center/cover no-repeat", opacity: 0.12 }} />
+        <div style={{ position: "absolute", inset: 0, background: `url(${autopartImg}) center/cover no-repeat`, opacity: 0.24 }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(11,26,40,0.75), rgba(11,26,40,0.97))" }} />
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 20% 50%, rgba(139,164,200,0.06) 0%, transparent 60%)" }} />
         <div style={{ maxWidth: 1120, margin: "0 auto", position: "relative" }}>

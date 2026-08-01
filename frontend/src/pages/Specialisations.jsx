@@ -1,6 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import FadeIn from "../components/FadeIn";
 import SectionTag from "../components/SectionTag";
+import spicesImg from "../assets/spices.jpg";
+import autopartImg from "../assets/autopart.jpg";
+import pharmaImg from "../assets/pharma.jpg";
 
 const SECTORS = [
   {
@@ -9,7 +12,7 @@ const SECTORS = [
     tagline: "Celebrating heritage through authentic sourcing.",
     desc: "38 authenticated product lines sourced directly from growers and processors across Kerala, Tamil Nadu, and Rajasthan. From staple grains to artisan condiments — and featuring Sahya, our B2C label for the specialty grocer and diaspora markets.",
     stats: [{ v: "38", l: "Products" }, { v: "6", l: "Categories" }, { v: "Kerala", l: "Heartland" }],
-    bg: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=900&q=75",
+    bg: spicesImg,
     accent: "#C8963E",
   },
   {
@@ -18,7 +21,7 @@ const SECTORS = [
     tagline: "OEM-quality components. Reliable delivery.",
     desc: "India is the world's third-largest automobile manufacturer. We connect buyers in Africa, the Middle East, and South-East Asia with certified Indian automotive suppliers — tyres, braking, engine components, electrical, filtration, and body parts.",
     stats: [{ v: "6", l: "Categories" }, { v: "OEM", l: "Quality Standard" }, { v: "Global", l: "Reach" }],
-    bg: "https://images.unsplash.com/photo-1614027164847-1b28cfe1df60?w=900&q=75",
+    bg: autopartImg,
     accent: "#8BA4C8",
   },
   {
@@ -27,7 +30,7 @@ const SECTORS = [
     tagline: "Temperature-controlled. Compliance-first.",
     desc: "India supplies over 20% of the world's generic medicines. Aurelia sources from WHO-GMP and USFDA-certified manufacturers — finished formulations, Ayurvedic preparations, nutraceuticals, APIs, and medical consumables.",
     stats: [{ v: "6", l: "Categories" }, { v: "WHO-GMP", l: "Certified" }, { v: "USFDA", l: "Approved Sources" }],
-    bg: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=900&q=75",
+    bg: pharmaImg,
     accent: "#7FC4A0",
   },
 ];

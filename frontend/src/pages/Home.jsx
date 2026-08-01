@@ -8,6 +8,9 @@ import ContainerJourney from "../components/ContainerJourney";
 import { submitContact } from "../api/client";
 import { validateContactForm } from "../utils/validation";
 import { useFormSubmit } from "../hooks/useFormSubmit";
+import spicesImg from "../assets/spices.jpg";
+import autopartImg from "../assets/autopart.jpg";
+import pharmaImg from "../assets/pharma.jpg";
 import { LIMITS } from "../constants/quoteForm";
 
 /* ─── Contact form ─── */
@@ -103,7 +106,7 @@ function SpecialisationsPreview() {
       sub: "Kerala dry goods · Spices · Snacks · Condiments",
       desc: "38 authenticated product lines sourced directly from growers and manufacturers across Kerala, Tamil Nadu, and Rajasthan.",
       tag: "38 Products",
-      bg: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800&q=70",
+      bg: spicesImg,
     },
     {
       slug: "vehicle-parts",
@@ -111,7 +114,7 @@ function SpecialisationsPreview() {
       sub: "Tyres · Braking · Engine · Electrical",
       desc: "OEM-quality automotive components from India's leading manufacturers — for commercial, passenger, and two-wheeler fleets.",
       tag: "6 Categories",
-      bg: "https://images.unsplash.com/photo-1614027164847-1b28cfe1df60?w=800&q=70",
+      bg: autopartImg,
     },
     {
       slug: "pharmaceuticals",
@@ -119,7 +122,7 @@ function SpecialisationsPreview() {
       sub: "Generics · Ayurvedic · APIs · Consumables",
       desc: "WHO-GMP and USFDA-certified pharmaceutical products — from finished formulations to active pharmaceutical ingredients.",
       tag: "6 Categories",
-      bg: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=70",
+      bg: pharmaImg,
     },
   ];
 
