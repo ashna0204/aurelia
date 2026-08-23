@@ -7,6 +7,11 @@ body { overflow-x: hidden; background: #071E12; -webkit-font-smoothing: antialia
 @keyframes float1 { 0%,100% { transform: translateY(0) translateX(0); } 50% { transform: translateY(-13px) translateX(8px); } }
 @keyframes float2 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-22px); } }
 
+/* Flowing dashes along a completed trade route on the home page. Those paths
+   set pathLength="1", so the offset is in normalised units: 0.036 is one full
+   period of the "0.014 0.022" dash pattern, which makes the loop seamless. */
+@keyframes routeFlow { to { stroke-dashoffset: -0.036; } }
+
 input::placeholder, textarea::placeholder { color: rgba(245,240,232,0.22); }
 select option { background: #0D2A1A; color: #F5F0E8; }
 
@@ -22,4 +27,16 @@ select option { background: #0D2A1A; color: #F5F0E8; }
 }
 @media (min-width: 769px) {
   .mob-menu { display: none !important; }
+}
+
+/* Ambient motion (hero particles, route flow, hover eases) is decorative — cut
+   it to a single frame rather than leaving it running. Components that animate
+   from JS read the same preference via useReducedMotion. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
 }

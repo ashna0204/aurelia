@@ -5,7 +5,10 @@ import SectionTag from "../components/SectionTag";
 import { submitContact } from "../api/client";
 import { validateContactForm } from "../utils/validation";
 import { useFormSubmit } from "../hooks/useFormSubmit";
+import { useReducedMotion } from "../hooks/useReducedMotion";
+import { useScrollSequence } from "../hooks/useScrollSequence";
 import { LIMITS } from "../constants/quoteForm";
+import { NODES, ROUTES, GRID_LINES, NODE_TIMING, pointAtFraction } from "../utils/tradeRoutes";
 
 /* ─── Contact form ─── */
 const contactLabelStyle = {
@@ -26,52 +29,50 @@ const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 const clamp01 = (v, a, b) => Math.max(0, Math.min(1, (v - a) / (b - a)));
 
 /* ─── Trade Route SVG Animation ─── */
-function TradeRouteMap({ progress }) {
-  // Nodes (in a 1200 x 500 viewBox)
-  const nodes = {
-    kochi:     { x: 710, y: 295, label: "Kochi", primary: true },
-    dubai:     { x: 620, y: 238, label: "Dubai", hub: true },
-    london:    { x: 335, y: 158, label: "London" },
-    rotterdam: { x: 362, y: 148, label: "Rotterdam" },
-    newYork:   { x: 160, y: 210, label: "New York" },
-    singapore: { x: 870, y: 345, label: "Singapore", hub: true },
-    sydney:    { x: 945, y: 428, label: "Sydney" },
-    nairobi:   { x: 548, y: 328, label: "Nairobi" },
-  };
 
-  // Route phases: [startP, endP]
-  const routes = [
-    { d: "M 710,295 C 680,272 650,255 620,238",         range: [0.08, 0.22], width: 1.8 },
-    { d: "M 620,238 C 525,192 415,170 335,158",          range: [0.20, 0.38], width: 1.2 },
-    { d: "M 620,238 C 530,188 435,163 362,148",          range: [0.22, 0.40], width: 1.0 },
-    { d: "M 710,295 C 780,325 835,338 870,345",          range: [0.28, 0.44], width: 1.5 },
-    { d: "M 870,345 C 902,382 928,410 945,428",          range: [0.40, 0.54], width: 1.0 },
-    { d: "M 710,295 C 440,90  250,130 160,210",          range: [0.36, 0.56], width: 1.0 },
-    { d: "M 620,238 C 590,285 568,308 548,328",          range: [0.44, 0.58], width: 0.8 },
-  ];
+// Dash pattern for the flowing underlay on a completed lane. The paths declare
+// pathLength="1", so dash values are in normalised units — the whole lane is 1
+// unit long, which is why an unnormalised pattern renders as a solid line.
+// (the matching `routeFlow` keyframe in index.css shifts by one full period)
+const FLOW_DASH = "0.014 0.022";
 
+// How long after a lane lands its flow and cargo fade in.
+const LANE_SETTLE = 0.08;
+// Scroll distance an arrival ring takes to expand and fade.
+const PING_SPAN = 0.07;
+
+function TradeRouteMap({ progress, animate }) {
   const p = (a, b) => easeOut(clamp01(progress, a, b));
 
-  const nodeOpacity = (key) => {
-    const map = { kochi: [0.05, 0.12], dubai: [0.18, 0.26], london: [0.32, 0.42],
-      rotterdam: [0.34, 0.44], newYork: [0.38, 0.50], singapore: [0.30, 0.40],
-      sydney: [0.42, 0.52], nairobi: [0.44, 0.54] };
-    return p(...map[key]);
-  };
+  // Drawn fraction of each lane, plus how settled the completed lane is.
+  const lanes = ROUTES.map((route) => ({
+    route,
+    drawn: p(...route.range),
+    settled: p(route.range[1], route.range[1] + LANE_SETTLE),
+  }));
 
-  // Grid lines
-  const gridLines = [];
-  for (let i = 0; i <= 12; i++) {
-    gridLines.push({ x1: i * 100, y1: 0, x2: i * 100, y2: 500 });
-  }
-  for (let i = 0; i <= 5; i++) {
-    gridLines.push({ x1: 0, y1: i * 100, x2: 1200, y2: i * 100 });
-  }
+  // Node state is read twice — once for the marker, once for the label — so
+  // it is derived once here rather than recomputed per pass.
+  const nodeState = Object.fromEntries(
+    Object.entries(NODE_TIMING).map(([key, { arrive, reveal }]) => {
+      // A destination is faintly present before its lane lands, so the line is
+      // drawn *towards* something, then lands with a pop and a ring.
+      const pending = p(reveal[0] - 0.09, reveal[0]);
+      const landed = p(arrive - 0.02, arrive + 0.03);
+      const ping = clamp01(progress, arrive, arrive + PING_SPAN);
+      return [key, {
+        opacity: 0.2 * pending + 0.8 * landed,
+        scale: 1 + 0.32 * Math.sin(Math.PI * landed),
+        landed,
+        ping,
+      }];
+    })
+  );
 
   const badgeOpacity = easeOut(clamp01(progress, 0.65, 0.82));
 
   return (
-    <svg viewBox="0 0 1200 500" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} preserveAspectRatio="xMidYMid slice">
+    <svg viewBox="0 0 1200 500" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} preserveAspectRatio="xMidYMid slice">
       <defs>
         <filter id="glow-gold" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="5" result="b" />
@@ -85,70 +86,116 @@ function TradeRouteMap({ progress }) {
           <stop offset="0%" stopColor="#C8963E" stopOpacity="0.35" />
           <stop offset="100%" stopColor="#C8963E" stopOpacity="0" />
         </radialGradient>
-        <linearGradient id="route-fade" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#C8963E" />
-          <stop offset="100%" stopColor="rgba(200,150,62,0.4)" />
-        </linearGradient>
+        {/* Unstroked copies for <animateMotion> to follow, kept separate from
+            the visible paths so the pathLength normalisation there cannot
+            affect how far along the cargo has travelled. */}
+        {ROUTES.map((route) => (
+          <path key={route.id} id={route.id} d={route.d} fill="none" />
+        ))}
       </defs>
 
       {/* Grid */}
-      {gridLines.map((l, i) => (
+      {GRID_LINES.map((l, i) => (
         <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
           stroke="rgba(200,150,62,0.04)" strokeWidth="1" />
       ))}
 
       {/* Origin pulse ring */}
-      <circle cx={nodes.kochi.x} cy={nodes.kochi.y} r={60}
-        fill="url(#origin-glow)" opacity={nodeOpacity("kochi")} />
+      <circle cx={NODES.kochi.x} cy={NODES.kochi.y} r={60}
+        fill="url(#origin-glow)" opacity={nodeState.kochi.opacity} />
 
       {/* Animated trade routes */}
-      {routes.map((r, i) => (
-        <path key={i} d={r.d} fill="none"
-          stroke="#C8963E" strokeWidth={r.width}
+      {lanes.map(({ route, drawn }) => (
+        <path key={route.id} d={route.d} fill="none"
+          stroke="#C8963E" strokeWidth={route.width}
           strokeOpacity={0.65}
           strokeLinecap="round"
           pathLength="1"
           strokeDasharray="1"
-          strokeDashoffset={1 - p(...r.range)}
+          strokeDashoffset={1 - drawn}
         />
       ))}
 
-      {/* Subtle dashed echo on main routes */}
-      {routes.slice(0, 4).map((r, i) => (
-        <path key={"d" + i} d={r.d} fill="none"
-          stroke="#C8963E" strokeWidth={0.4}
-          strokeOpacity={0.25}
+      {/* Flowing underlay: a landed lane keeps moving, so the network reads as
+          operating rather than finished once the scroll is parked. */}
+      {lanes.map(({ route, settled }, i) => (
+        <path key={"flow-" + route.id} d={route.d} fill="none"
+          stroke="#C8963E" strokeWidth={0.5}
+          strokeOpacity={0.3 * settled}
           strokeLinecap="round"
-          strokeDasharray="4 8"
           pathLength="1"
-          strokeDashoffset={1 - p(...r.range)}
+          strokeDasharray={FLOW_DASH}
+          style={animate ? { animation: `routeFlow ${3 + (i % 3) * 0.7}s linear infinite` } : undefined}
         />
       ))}
 
-      {/* Nodes */}
-      {Object.entries(nodes).map(([key, n]) => (
-        <g key={key} opacity={nodeOpacity(key)}>
-          {n.primary && <circle cx={n.x} cy={n.y} r={22} fill="#C8963E" opacity={0.08} />}
-          <circle cx={n.x} cy={n.y} r={n.primary ? 7 : n.hub ? 5 : 3.5}
-            fill={n.primary ? "#C8963E" : n.hub ? "#C8963E" : "#F5F0E8"}
-            filter={n.primary ? "url(#glow-gold)" : "url(#glow-sm)"}
-            opacity={n.primary ? 1 : 0.9}
-          />
-          {n.primary && <circle cx={n.x} cy={n.y} r={12} fill="none" stroke="#C8963E" strokeWidth="0.8" strokeOpacity="0.4" />}
+      {/* Cargo riding each landed lane */}
+      {animate && lanes.map(({ route, settled }, i) => (
+        <g key={"cargo-" + route.id} opacity={settled}>
+          <circle r={5} fill="#C8963E" opacity={0.16}>
+            <animateMotion dur={`${6 + i * 0.8}s`} begin={`-${i * 1.3}s`} repeatCount="indefinite">
+              <mpath href={`#${route.id}`} xlinkHref={`#${route.id}`} />
+            </animateMotion>
+          </circle>
+          <circle r={1.8} fill="#F5F0E8" opacity={0.85}>
+            <animateMotion dur={`${6 + i * 0.8}s`} begin={`-${i * 1.3}s`} repeatCount="indefinite">
+              <mpath href={`#${route.id}`} xlinkHref={`#${route.id}`} />
+            </animateMotion>
+          </circle>
         </g>
       ))}
 
-      {/* City labels */}
-      {Object.entries(nodes).map(([key, n]) => (
-        <text key={"lbl-" + key}
-          x={n.x + (n.x > 700 ? 12 : -12)} y={n.y + 4}
-          textAnchor={n.x > 700 ? "start" : "end"}
-          fill="#F5F0E8" fontSize="10" fontFamily="'DM Sans', sans-serif"
-          letterSpacing="1.5" opacity={nodeOpacity(key) * 0.6}
-        >
-          {n.label.toUpperCase()}
-        </text>
-      ))}
+      {/* Bright head on the lane currently being drawn */}
+      {lanes.map(({ route, drawn }) => {
+        if (drawn <= 0 || drawn >= 1) return null;
+        const { x, y } = pointAtFraction(route, drawn);
+        const opacity = Math.min(1, drawn * 14, (1 - drawn) * 10);
+        return (
+          <g key={"head-" + route.id} opacity={opacity}>
+            <circle cx={x} cy={y} r={7} fill="#C8963E" opacity={0.18} />
+            <circle cx={x} cy={y} r={2.4} fill="#F5F0E8" />
+          </g>
+        );
+      })}
+
+      {/* Nodes */}
+      {Object.entries(NODES).map(([key, n]) => {
+        const { opacity, scale, ping } = nodeState[key];
+        return (
+          <g key={key} opacity={opacity}>
+            {/* Arrival ring, expanding outward as the lane lands */}
+            {ping > 0 && ping < 1 && (
+              <circle cx={n.x} cy={n.y} r={8 + 30 * ping} fill="none"
+                stroke="#C8963E" strokeWidth={1.2} strokeOpacity={0.5 * (1 - ping)} />
+            )}
+            <g transform={`translate(${n.x} ${n.y}) scale(${scale})`}>
+              {n.primary && <circle r={22} fill="#C8963E" opacity={0.08} />}
+              <circle r={n.primary ? 7 : n.hub ? 5 : 3.5}
+                fill={n.primary || n.hub ? "#C8963E" : "#F5F0E8"}
+                filter={n.primary ? "url(#glow-gold)" : "url(#glow-sm)"}
+                opacity={n.primary ? 1 : 0.9}
+              />
+              {n.primary && <circle r={12} fill="none" stroke="#C8963E" strokeWidth="0.8" strokeOpacity="0.4" />}
+            </g>
+          </g>
+        );
+      })}
+
+      {/* City labels — settle in behind their node */}
+      {Object.entries(NODES).map(([key, n]) => {
+        const { landed } = nodeState[key];
+        const side = n.x > 700 ? 1 : -1;
+        return (
+          <text key={"lbl-" + key}
+            x={n.x + side * (12 + (1 - landed) * 7)} y={n.y + 4}
+            textAnchor={side > 0 ? "start" : "end"}
+            fill="#F5F0E8" fontSize="10" fontFamily="'DM Sans', sans-serif"
+            letterSpacing="1.5" opacity={landed * 0.6}
+          >
+            {n.label.toUpperCase()}
+          </text>
+        );
+      })}
 
       {/* Sector badges at destination clusters */}
       {/* Ethnic food — London/EU cluster */}
@@ -181,28 +228,24 @@ function TradeRouteMap({ progress }) {
 /* ─── Scroll Journey Section ─── */
 function ScrollJourney() {
   const containerRef = useRef(null);
-  const [progress, setProgress] = useState(0);
+  const reduced = useReducedMotion();
+  // Follows the scroll rather than tracking it, and will not let the sequence
+  // be skipped past on a fast flick. See useScrollSequence.
+  const scrolled = useScrollSequence(containerRef, !reduced);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const el = containerRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const total = el.offsetHeight - window.innerHeight;
-      setProgress(Math.max(0, Math.min(1, -rect.top / total)));
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  // Reduced motion gets the finished map and all three phases at once, rather
+  // than 320vh of scroll that has to be travelled to read the content.
+  const progress = reduced ? 1 : scrolled;
+  const p = (a, b) => (reduced ? 1 : easeOut(clamp01(progress, a, b)));
 
-  const p = (a, b) => easeOut(clamp01(progress, a, b));
-
-  // Phase text transitions
-  const line1Op = p(0.02, 0.12);
-  const line1Exit = 1 - easeOut(clamp01(progress, 0.52, 0.64));
-  const phase2Op = easeOut(clamp01(progress, 0.56, 0.70)) * (1 - easeOut(clamp01(progress, 0.84, 0.95)));
+  // Phase text transitions. These track scroll position directly, so they carry
+  // no CSS transition — a transition would lag behind and fight the scrubbing.
+  const line1Op = p(0.02, 0.12) * (reduced ? 1 : 1 - easeOut(clamp01(progress, 0.52, 0.64)));
   const statsOp = p(0.86, 0.97);
+  // Sectors are staggered by shifting each card's window rather than by a CSS
+  // delay, so the stagger also plays in reverse when scrolling back up.
+  const sectorOp = (i) =>
+    p(0.56 + i * 0.03, 0.70 + i * 0.03) * (reduced ? 1 : 1 - easeOut(clamp01(progress, 0.84, 0.95)));
 
   const sectors = [
     { label: "Ethnic Food & Grocery", sub: "38 product lines · Direct from Kerala" },
@@ -211,7 +254,7 @@ function ScrollJourney() {
   ];
 
   return (
-    <div ref={containerRef} style={{ height: "320vh", position: "relative" }}>
+    <div ref={containerRef} style={{ height: reduced ? "100vh" : "320vh", position: "relative" }}>
       <div style={{
         position: "sticky", top: 0, height: "100vh",
         background: "#040F09", overflow: "hidden",
@@ -221,13 +264,12 @@ function ScrollJourney() {
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 59% 60%, rgba(200,150,62,0.04) 0%, transparent 60%)" }} />
 
         {/* Trade route map */}
-        <TradeRouteMap progress={progress} />
+        <TradeRouteMap progress={progress} animate={!reduced} />
 
         {/* Phase 1: Origin text */}
         <div style={{
           position: "absolute", left: "6%", top: "50%", transform: "translateY(-50%)",
-          zIndex: 10, opacity: line1Op * line1Exit,
-          transition: "opacity 0.2s",
+          zIndex: 10, opacity: line1Op,
           maxWidth: 420,
         }}>
           <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "0.28em", color: "rgba(200,150,62,0.65)", textTransform: "uppercase", marginBottom: 18 }}>
@@ -238,22 +280,22 @@ function ScrollJourney() {
             <span style={{ color: "#C8963E", fontStyle: "italic" }}>to every market.</span>
           </h2>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "rgba(245,240,232,0.4)", lineHeight: 1.7, marginTop: 20 }}>
-            Scroll to trace the route.
+            {reduced ? "Kochi to forty markets." : "Scroll to trace the route."}
           </p>
         </div>
 
         {/* Phase 2: Three sectors */}
         <div style={{
           position: "absolute", bottom: "12%", left: "50%", transform: "translateX(-50%)",
-          zIndex: 10, opacity: phase2Op, transition: "opacity 0.25s",
+          zIndex: 10,
           display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center",
           pointerEvents: "none",
         }}>
           {sectors.map((s, i) => (
             <div key={i} style={{
               textAlign: "center",
-              transform: `translateY(${(1 - phase2Op) * 20}px)`,
-              transition: `transform 0.6s cubic-bezier(0.22,1,0.36,1) ${i * 0.08}s`,
+              opacity: sectorOp(i),
+              transform: `translateY(${(1 - sectorOp(i)) * 20}px)`,
             }}>
               <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(14px, 1.6vw, 17px)", color: "#F5F0E8", marginBottom: 4 }}>{s.label}</div>
               <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(200,150,62,0.65)", letterSpacing: "0.15em" }}>{s.sub}</div>
@@ -264,7 +306,7 @@ function ScrollJourney() {
         {/* Phase 3: Stats */}
         <div style={{
           position: "absolute", top: "14%", right: "5%",
-          zIndex: 10, opacity: statsOp, transition: "opacity 0.2s",
+          zIndex: 10, opacity: statsOp,
           display: "flex", flexDirection: "column", gap: 28,
           alignItems: "flex-end",
           pointerEvents: "none",
@@ -281,10 +323,12 @@ function ScrollJourney() {
           ))}
         </div>
 
-        {/* Scroll progress bar */}
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 2, background: "rgba(200,150,62,0.08)" }}>
-          <div style={{ height: "100%", width: `${progress * 100}%`, background: "linear-gradient(to right, #C8963E, #A67B2E)", transition: "width 0.1s" }} />
-        </div>
+        {/* Scroll progress bar — nothing to track when the section is not pinned */}
+        {!reduced && (
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 2, background: "rgba(200,150,62,0.08)" }}>
+            <div style={{ height: "100%", width: `${progress * 100}%`, background: "linear-gradient(to right, #C8963E, #A67B2E)" }} />
+          </div>
+        )}
       </div>
     </div>
   );
