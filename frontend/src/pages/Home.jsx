@@ -207,25 +207,25 @@ function TradeRouteMap({ progress, animate }) {
       {/* Sector badges at destination clusters */}
       {/* Ethnic food — London/EU cluster */}
       <g opacity={badgeOpacity}>
-        <rect x={272} y={118} width={90} height={22} rx={11}
+        <rect x={282} y={98} width={90} height={22} rx={11}
           fill="rgba(200,150,62,0.12)" stroke="rgba(200,150,62,0.3)" strokeWidth="0.8" />
-        <text x={317} y={133} textAnchor="middle" fill="#C8963E" fontSize="9"
+        <text x={327} y={113} textAnchor="middle" fill="#C8963E" fontSize="9"
           fontFamily="'DM Sans', sans-serif" letterSpacing="1.2">ETHNIC FOOD</text>
       </g>
 
       {/* Vehicle parts — North America */}
       <g opacity={badgeOpacity}>
-        <rect x={88} y={192} width={90} height={22} rx={11}
+        <rect x={115} y={228} width={90} height={22} rx={11}
           fill="rgba(200,150,62,0.08)" stroke="rgba(200,150,62,0.25)" strokeWidth="0.8" />
-        <text x={133} y={207} textAnchor="middle" fill="rgba(200,150,62,0.85)" fontSize="9"
+        <text x={160} y={243} textAnchor="middle" fill="rgba(200,150,62,0.85)" fontSize="9"
           fontFamily="'DM Sans', sans-serif" letterSpacing="1.2">VEHICLE PARTS</text>
       </g>
 
       {/* Pharma — Oceania */}
       <g opacity={badgeOpacity}>
-        <rect x={962} y={432} width={86} height={22} rx={11}
+        <rect x={962} y={446} width={86} height={22} rx={11}
           fill="rgba(200,150,62,0.08)" stroke="rgba(200,150,62,0.25)" strokeWidth="0.8" />
-        <text x={1005} y={447} textAnchor="middle" fill="rgba(200,150,62,0.85)" fontSize="9"
+        <text x={1005} y={461} textAnchor="middle" fill="rgba(200,150,62,0.85)" fontSize="9"
           fontFamily="'DM Sans', sans-serif" letterSpacing="1.2">PHARMA</text>
       </g>
     </svg>

@@ -33,7 +33,7 @@ const LANES = [
   { from: "dubai", to: "rotterdam", c1: [530, 188], c2: [435, 163], range: [0.22, 0.40], width: 1.0 },
   { from: "kochi", to: "singapore", c1: [780, 325], c2: [835, 338], range: [0.28, 0.44], width: 1.5 },
   { from: "singapore", to: "sydney", c1: [902, 382], c2: [928, 410], range: [0.40, 0.54], width: 1.0 },
-  { from: "kochi", to: "newYork",   c1: [440, 90],  c2: [250, 130], range: [0.36, 0.56], width: 1.0 },
+  { from: "kochi", to: "newYork",   c1: [440, 68],  c2: [250, 108], range: [0.36, 0.56], width: 1.0 },
   { from: "dubai", to: "nairobi",   c1: [590, 285], c2: [568, 308], range: [0.44, 0.58], width: 0.8 },
 ];
 
