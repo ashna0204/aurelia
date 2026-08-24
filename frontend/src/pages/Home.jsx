@@ -364,7 +364,7 @@ function Hero() {
       {/* Background image */}
       <div style={{ position: "absolute", inset: 0, background: "url('https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=1920&q=75') center/cover no-repeat", opacity: 0.28 }} />
       {/* Gradient overlays */}
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, rgba(4,15,9,0.9) 0%, rgba(7,30,18,0.55) 50%, rgba(4,15,9,0.85) 100%)" }} />
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, rgba(4,15,9,0.78) 0%, rgba(7,30,18,0.42) 50%, rgba(4,15,9,0.72) 100%)" }} />
       <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 25% 60%, rgba(200,150,62,0.07) 0%, transparent 55%)" }} />
 
       {/* Animated particles */}
@@ -398,7 +398,7 @@ function Hero() {
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
           fontSize: "clamp(16px, 1.9vw, 19px)",
-          color: "rgba(245,240,232,0.6)", lineHeight: 1.75,
+          color: "rgba(245,240,232,0.72)", lineHeight: 1.75,
           maxWidth: 600, margin: "0 auto 52px",
           ...anim(0.48),
         }}>
