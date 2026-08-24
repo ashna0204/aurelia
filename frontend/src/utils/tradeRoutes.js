@@ -131,3 +131,27 @@ export const GRID_LINES = [
   ...Array.from({ length: 13 }, (_, i) => ({ x1: i * 100, y1: 0, x2: i * 100, y2: 500 })),
   ...Array.from({ length: 6 }, (_, i) => ({ x1: 0, y1: i * 100, x2: 1200, y2: i * 100 })),
 ];
+
+/** The map's viewBox, exported so overlay geometry can be mapped into it. */
+export const VIEW_BOX = { width: 1200, height: 500 };
+
+export function toViewBoxX(x, box) {
+  const scale = Math.max(box.width / VIEW_BOX.width, box.height / VIEW_BOX.height);
+  const offset = (box.width - VIEW_BOX.width * scale) / 2;
+  return (x - offset) / scale;
+}
+
+export function progressAtX(route, x) {
+  const { samples, cumulative, range } = route;
+  for (let i = 1; i < samples.length; i++) {
+    const ax = samples[i - 1][0];
+    const bx = samples[i][0];
+    if ((x - ax) * (x - bx) > 0) continue;
+    const span = bx - ax;
+    const k = span === 0 ? 0 : (x - ax) / span;
+    const drawn = cumulative[i - 1] + (cumulative[i] - cumulative[i - 1]) * k;
+    const t = 1 - Math.cbrt(1 - Math.max(0, Math.min(1, drawn)));
+    return range[0] + t * (range[1] - range[0]);
+  }
+  return null;
+}

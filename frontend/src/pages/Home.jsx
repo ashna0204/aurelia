@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import FadeIn from "../components/FadeIn";
 import SectionTag from "../components/SectionTag";
@@ -8,7 +8,7 @@ import { useFormSubmit } from "../hooks/useFormSubmit";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { useScrollSequence } from "../hooks/useScrollSequence";
 import { LIMITS } from "../constants/quoteForm";
-import { NODES, ROUTES, GRID_LINES, NODE_TIMING, pointAtFraction } from "../utils/tradeRoutes";
+import { NODES, ROUTES, GRID_LINES, NODE_TIMING, pointAtFraction, progressAtX, toViewBoxX } from "../utils/tradeRoutes";
 
 /* ─── Contact form ─── */
 const contactLabelStyle = {
@@ -40,6 +40,13 @@ const FLOW_DASH = "0.014 0.022";
 const LANE_SETTLE = 0.08;
 // Scroll distance an arrival ring takes to expand and fade.
 const PING_SPAN = 0.07;
+
+// The lane the origin copy has to get out of the way of: it lands on New York,
+// which sits on the same side of the map as the copy.
+const NEW_YORK_LANE = ROUTES.find((r) => r.to === "newYork");
+// Used until the overlay has been measured, and if it turns out never to reach
+// the lane at all — the copy still has to clear before the stats phase.
+const ORIGIN_FADE_FALLBACK = [0.52, 0.64];
 
 function TradeRouteMap({ progress, animate }) {
   const p = (a, b) => easeOut(clamp01(progress, a, b));
@@ -228,24 +235,55 @@ function TradeRouteMap({ progress, animate }) {
 /* ─── Scroll Journey Section ─── */
 function ScrollJourney() {
   const containerRef = useRef(null);
+  const stageRef = useRef(null);
+  const originRef = useRef(null);
   const reduced = useReducedMotion();
   // Follows the scroll rather than tracking it, and will not let the sequence
   // be skipped past on a fast flick. See useScrollSequence.
   const scrolled = useScrollSequence(containerRef, !reduced);
+
+  const [originEdgeX, setOriginEdgeX] = useState(null);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    const origin = originRef.current;
+    if (!stage || !origin || typeof ResizeObserver === "undefined") return;
+
+    const measure = () => {
+      const box = stage.getBoundingClientRect();
+      if (!box.width || !box.height) return;
+      const copy = origin.getBoundingClientRect();
+      setOriginEdgeX(toViewBoxX(copy.right - box.left, box));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(stage);
+    observer.observe(origin);
+    return () => observer.disconnect();
+  }, []);
 
   // Reduced motion gets the finished map and all three phases at once, rather
   // than 320vh of scroll that has to be travelled to read the content.
   const progress = reduced ? 1 : scrolled;
   const p = (a, b) => (reduced ? 1 : easeOut(clamp01(progress, a, b)));
 
+  const originFade = useMemo(() => {
+    if (originEdgeX == null) return ORIGIN_FADE_FALLBACK;
+    const [start, arrival] = NEW_YORK_LANE.range;
+    const contact = progressAtX(NEW_YORK_LANE, originEdgeX);
+    if (contact != null) return contact < arrival ? [contact, arrival] : ORIGIN_FADE_FALLBACK;
+    return originEdgeX > NODES.kochi.x ? [start, arrival] : ORIGIN_FADE_FALLBACK;
+  }, [originEdgeX]);
+
   // Phase text transitions. These track scroll position directly, so they carry
   // no CSS transition — a transition would lag behind and fight the scrubbing.
-  const line1Op = p(0.02, 0.12) * (reduced ? 1 : 1 - easeOut(clamp01(progress, 0.52, 0.64)));
+  const line1Op = p(0.02, 0.12) * (reduced ? 1 : 1 - easeOut(clamp01(progress, ...originFade)));
   const statsOp = p(0.86, 0.97);
 
   return (
     <div ref={containerRef} style={{ height: reduced ? "100vh" : "320vh", position: "relative" }}>
-      <div style={{
+      <div ref={stageRef} style={{
         position: "sticky", top: 0, height: "100vh",
         background: "#040F09", overflow: "hidden",
         display: "flex", alignItems: "center", justifyContent: "center",
@@ -257,7 +295,7 @@ function ScrollJourney() {
         <TradeRouteMap progress={progress} animate={!reduced} />
 
         {/* Phase 1: Origin text */}
-        <div style={{
+        <div ref={originRef} style={{
           position: "absolute", left: "6%", top: "50%", transform: "translateY(-50%)",
           zIndex: 10, opacity: line1Op,
           maxWidth: 420,
