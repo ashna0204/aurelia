@@ -242,16 +242,6 @@ function ScrollJourney() {
   // no CSS transition — a transition would lag behind and fight the scrubbing.
   const line1Op = p(0.02, 0.12) * (reduced ? 1 : 1 - easeOut(clamp01(progress, 0.52, 0.64)));
   const statsOp = p(0.86, 0.97);
-  // Sectors are staggered by shifting each card's window rather than by a CSS
-  // delay, so the stagger also plays in reverse when scrolling back up.
-  const sectorOp = (i) =>
-    p(0.56 + i * 0.03, 0.70 + i * 0.03) * (reduced ? 1 : 1 - easeOut(clamp01(progress, 0.84, 0.95)));
-
-  const sectors = [
-    { label: "Ethnic Food & Grocery", sub: "38 product lines · Direct from Kerala" },
-    { label: "Vehicle Parts", sub: "OEM-quality · 6 categories" },
-    { label: "Pharmaceuticals", sub: "WHO-GMP certified · APIs to OTC" },
-  ];
 
   return (
     <div ref={containerRef} style={{ height: reduced ? "100vh" : "320vh", position: "relative" }}>
@@ -282,25 +272,6 @@ function ScrollJourney() {
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "rgba(245,240,232,0.4)", lineHeight: 1.7, marginTop: 20 }}>
             {reduced ? "Kochi to forty markets." : "Scroll to trace the route."}
           </p>
-        </div>
-
-        {/* Phase 2: Three sectors */}
-        <div style={{
-          position: "absolute", bottom: "12%", left: "50%", transform: "translateX(-50%)",
-          zIndex: 10,
-          display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center",
-          pointerEvents: "none",
-        }}>
-          {sectors.map((s, i) => (
-            <div key={i} style={{
-              textAlign: "center",
-              opacity: sectorOp(i),
-              transform: `translateY(${(1 - sectorOp(i)) * 20}px)`,
-            }}>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(14px, 1.6vw, 17px)", color: "#F5F0E8", marginBottom: 4 }}>{s.label}</div>
-              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(200,150,62,0.65)", letterSpacing: "0.15em" }}>{s.sub}</div>
-            </div>
-          ))}
         </div>
 
         {/* Phase 3: Stats */}
@@ -374,14 +345,6 @@ function Hero() {
 
       <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "120px 24px 80px", maxWidth: 920, margin: "0 auto" }}>
 
-        <div style={anim(0.15)}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 12, marginBottom: 36, padding: "7px 20px", border: "1px solid rgba(200,150,62,0.28)", borderRadius: 40 }}>
-            <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#C8963E" }} />
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 500, color: "rgba(245,240,232,0.65)", letterSpacing: "0.24em", textTransform: "uppercase" }}>
-              UK-Registered Global Trade Facilitator
-            </span>
-          </div>
-        </div>
 
         <h1 style={{
           fontFamily: "'Playfair Display', serif",
