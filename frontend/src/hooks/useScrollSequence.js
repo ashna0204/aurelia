@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { isProgrammaticScroll } from "../utils/programmaticScroll";
 
 /**
  * Floor on how long the full sequence may take to play. A flick or a Page Down
@@ -44,7 +45,9 @@ const UP_TOLERANCE = 2;
  *    skipped past mid-animation. This happens at most once: after the sequence
  *    has run to the end, scrolling is never intercepted again.
  *
- * Scrolling up always cancels a takeover immediately.
+ * Scrolling up always cancels a takeover immediately, and a scroll the app
+ * started itself (see utils/programmaticScroll) is never taken over — an anchor
+ * jump past the section is a destination, not a flick.
  *
  * @param {import("react").RefObject<HTMLElement>} ref - the tall pinning container.
  * @param {boolean} [enabled=true] - false leaves the scroll entirely alone.
@@ -102,10 +105,13 @@ export function useScrollSequence(ref, enabled = true) {
       // decrease is the user reaching for the scrollbar — hand control back.
       if (s.takingOver && y < s.lastY - UP_TOLERANCE) s.takingOver = false;
 
+
+      const ours = isProgrammaticScroll();
+
       // Deliberately not requiring the section to still be pinned: the fastest
       // flicks land past it entirely, and those are the ones worth catching.
       const entered = rect.top <= 0;
-      if (!s.played && !s.takingOver && entered && target > s.shown + TAKEOVER_GAP) {
+      if (!s.played && !s.takingOver && !ours && entered && target > s.shown + TAKEOVER_GAP) {
         s.takingOver = true;
       }
 
@@ -119,6 +125,9 @@ export function useScrollSequence(ref, enabled = true) {
           s.takingOver = false;
           s.played = true;
         }
+      } else if (ours) {
+        s.shown = target;
+        if (s.shown >= 1 - EPSILON) s.played = true;
       } else {
         // Frame-rate independent exponential follow. The snap has to come after
         // the step, not before: the run ends the moment the gap fits inside

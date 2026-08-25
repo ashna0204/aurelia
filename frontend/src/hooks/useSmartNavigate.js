@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
+import { markProgrammaticScroll } from "../utils/programmaticScroll";
 
 // Delay before scrolling to an in-page anchor after a cross-route navigation,
 // giving the target route time to mount.
@@ -20,8 +21,15 @@ export function useSmartNavigate({ smoothScrollTop = true } = {}) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const scrollToAnchor = (hash) =>
-    document.getElementById(hash)?.scrollIntoView({ behavior: "smooth" });
+  // Marked as ours: a jump to a section below the home page's pinned scroll
+  // sequence is indistinguishable from a fast flick, which that sequence
+  // intercepts. See utils/programmaticScroll.
+  const scrollToAnchor = (hash) => {
+    const el = document.getElementById(hash);
+    if (!el) return;
+    markProgrammaticScroll();
+    el.scrollIntoView({ behavior: "smooth" });
+  };
 
   return function go(to) {
     if (to.includes("#")) {

@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useScrollSequence } from '../hooks/useScrollSequence'
+import { markProgrammaticScroll, clearProgrammaticScroll } from '../utils/programmaticScroll'
 
 const VIEWPORT = 900
 const SECTION_HEIGHT = 2880 // 320vh
@@ -59,6 +60,7 @@ function setup() {
 }
 
 afterEach(() => {
+  clearProgrammaticScroll()
   vi.unstubAllGlobals()
   delete window.scrollY
   delete window.innerHeight
@@ -214,5 +216,54 @@ describe('useScrollSequence', () => {
     h.frames(5)
     expect(result.current).toBe(0)
     expect(h.written).toHaveLength(0)
+  })
+  it('does not take over an anchor jump the app started', () => {
+    const h = setup()
+    const { result } = renderHook(() => useScrollSequence(h.ref))
+    h.frames(1)
+
+    // Navbar "Contact" from another route: the target section sits below the
+    // sequence, so the jump passes clean through it.
+    markProgrammaticScroll()
+    h.scroll(SECTION_TOP + TOTAL + 4000)
+    h.frames(30)
+
+    expect(h.written).toHaveLength(0)
+    expect(h.getY()).toBe(SECTION_TOP + TOTAL + 4000)
+    expect(result.current).toBe(1)
+  })
+
+  it('does not take over on the tail of an anchor jump once the mark lapses', () => {
+    const h = setup()
+    const { result } = renderHook(() => useScrollSequence(h.ref))
+    h.frames(1)
+
+    markProgrammaticScroll()
+    h.scroll(SECTION_TOP + TOTAL + 4000)
+    h.frames(2)
+    clearProgrammaticScroll() // the deadline passes mid-glide
+
+    h.scroll(SECTION_TOP + TOTAL + 4200)
+    h.frames(30)
+
+    expect(h.written).toHaveLength(0)
+    expect(result.current).toBe(1)
+  })
+
+  it('still gates a user flick that follows a marked scroll', () => {
+    const h = setup()
+    const { result } = renderHook(() => useScrollSequence(h.ref))
+    h.frames(1)
+
+    markProgrammaticScroll()
+    h.scroll(SECTION_TOP + 40) // an anchor above the sequence: nothing played
+    h.frames(2)
+    clearProgrammaticScroll()
+
+    h.scroll(SECTION_TOP + TOTAL)
+    h.frames(10)
+
+    expect(h.written.length).toBeGreaterThan(0)
+    expect(result.current).toBeLessThan(1)
   })
 })
