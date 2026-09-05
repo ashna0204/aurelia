@@ -9,6 +9,7 @@ import { useReducedMotion } from "../hooks/useReducedMotion";
 import { useScrollSequence } from "../hooks/useScrollSequence";
 import { LIMITS } from "../constants/quoteForm";
 import { NODES, ROUTES, GRID_LINES, NODE_TIMING, pointAtFraction, progressAtX, toViewBoxX } from "../utils/tradeRoutes";
+import { LAND_DOTS, DOT_SPACING } from "../utils/worldMapBackdrop";
 
 /* ─── Contact form ─── */
 const contactLabelStyle = {
@@ -40,6 +41,12 @@ const FLOW_DASH = "0.014 0.022";
 const LANE_SETTLE = 0.08;
 // Scroll distance an arrival ring takes to expand and fade.
 const PING_SPAN = 0.07;
+
+// Dot sizes for the world map behind the lanes, as fractions of the spacing
+// between dots: the world sits back while the operating regions come forward on
+// larger dots, so the map reads as "we work *here*" before a word is read.
+const DOT_RADIUS = 0.18;
+const REGION_DOT_RADIUS = 0.26;
 
 // The lane the origin copy has to get out of the way of: it lands on New York,
 // which sits on the same side of the map as the copy.
@@ -106,6 +113,13 @@ function TradeRouteMap({ progress, animate }) {
         <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
           stroke="rgba(200,150,62,0.04)" strokeWidth="1" />
       ))}
+
+      {/* Dotted world map, fitted to the nodes rather than the other way
+          round — see utils/worldMapBackdrop. Two paths, not 5,700 circles. */}
+      <path d={LAND_DOTS.base} fill="none" stroke="rgba(245,240,232,0.5)"
+        strokeWidth={DOT_SPACING * DOT_RADIUS * 2} strokeLinecap="round" opacity="0.3" />
+      <path d={LAND_DOTS.highlighted} fill="none" stroke="#C8963E"
+        strokeWidth={DOT_SPACING * REGION_DOT_RADIUS * 2} strokeLinecap="round" opacity="0.55" />
 
       {/* Origin pulse ring */}
       <circle cx={NODES.kochi.x} cy={NODES.kochi.y} r={60}

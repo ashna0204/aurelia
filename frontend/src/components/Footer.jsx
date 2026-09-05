@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useSmartNavigate } from "../hooks/useSmartNavigate";
+import Logo from "./Logo";
 
 function Modal({ title, onClose, children }) {
   return (
@@ -72,10 +73,8 @@ export default function Footer() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 48, marginBottom: 56 }}>
             <div style={{ maxWidth: 300 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #C8963E, #8B6914)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ color: "#F5F0E8", fontSize: 15, fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>A</span>
-                </div>
-                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 600, color: "#F5F0E8", letterSpacing: "0.06em" }}>AURELIA LOGISTICS</span>
+                <Logo size={36} style={{ flexShrink: 0 }} />
+                <span style={{ fontFamily: "'Cinzel', serif", fontWeight: 600, fontSize: 15, letterSpacing: "0.3em", textTransform: "uppercase", color: "#E8C547" }}>AURELIA LOGISTICS</span>
               </div>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(245,240,232,0.35)", lineHeight: 1.8 }}>
                 UK-registered global trade facilitator. Ethnic food, vehicle parts, and pharmaceuticals — from South Asia to the world.
