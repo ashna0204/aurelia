@@ -7,33 +7,40 @@ import { validateQuoteForm } from "../utils/validation";
 import { useFormSubmit } from "../hooks/useFormSubmit";
 import {
   SECTORS,
-  VOLUMES,
-  FREQUENCIES,
   LIMITS,
   MIN_FILL_MS,
   HONEYPOT_FIELD,
   composeMessage,
 } from "../constants/quoteForm";
+import { colors, fonts } from "../theme";
+
+const EMAIL = "enquiries@aurelialogistics.co.uk";
 
 const EMPTY_FORM = {
-  name: "", email: "", company: "", phone: "",
-  sector: "", description: "", volume: "", frequency: "", destination: "", notes: "",
+  name: "", company: "", email: "", phone: "", country: "",
+  sector: "", specification: "", quantity: "", targetMarket: "",
+  packaging: "", destination: "", deliveryDate: "", notes: "",
   [HONEYPOT_FIELD]: "",
 };
 
 const labelStyle = {
-  fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "rgba(245,240,232,0.35)",
+  fontFamily: fonts.sans, fontSize: 10, color: "rgba(245,240,232,0.35)",
   letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 8,
 };
 
+const legendStyle = {
+  fontFamily: fonts.sans, fontSize: 10, color: "rgba(200,150,62,0.7)",
+  letterSpacing: "0.24em", textTransform: "uppercase", padding: 0, marginBottom: 22,
+};
+
 const errorTextStyle = {
-  fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#e07060",
+  fontFamily: fonts.sans, fontSize: 12, color: colors.error,
   margin: "6px 0 0", lineHeight: 1.4,
 };
 
 const counterStyle = (over) => ({
-  fontFamily: "'DM Sans', sans-serif", fontSize: 11, margin: "6px 0 0", textAlign: "right",
-  color: over ? "#e07060" : "rgba(245,240,232,0.3)",
+  fontFamily: fonts.sans, fontSize: 11, margin: "6px 0 0", textAlign: "right",
+  color: over ? colors.error : "rgba(245,240,232,0.3)",
 });
 
 // Off-screen rather than display:none — a bot filling every input it can find
@@ -53,6 +60,16 @@ const visuallyHiddenRadio = {
 function FieldError({ field, errors }) {
   if (!errors[field]) return null;
   return <p id={`${field}-error`} style={errorTextStyle}>{errors[field]}</p>;
+}
+
+/** A labelled group of fields — "Your details", "Your requirement". */
+function FieldSet({ legend, children }) {
+  return (
+    <fieldset style={{ border: "none", padding: 0, margin: 0, minWidth: 0, display: "flex", flexDirection: "column", gap: 20 }}>
+      <legend style={legendStyle}>{legend}</legend>
+      {children}
+    </fieldset>
+  );
 }
 
 export default function QuotePage() {
@@ -78,6 +95,8 @@ export default function QuotePage() {
       el.focus({ preventScroll: true });
       el.scrollIntoView({ behavior: "smooth", block: "center" });
     },
+    // Everything the API has no column for is folded into `message` by
+    // composeMessage, so the trade team still sees it on the notification.
     submit: (values) =>
       submitQuote({
         name: values.name.trim(),
@@ -85,8 +104,6 @@ export default function QuotePage() {
         company: values.company.trim(),
         phone: values.phone.trim(),
         products: [values.sector],
-        volume: values.volume,
-        frequency: values.frequency,
         destination: values.destination.trim(),
         message: composeMessage(values),
         [HONEYPOT_FIELD]: values[HONEYPOT_FIELD],
@@ -94,7 +111,7 @@ export default function QuotePage() {
   });
 
   const inputStyle = {
-    fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#F5F0E8",
+    fontFamily: fonts.sans, fontSize: 14, color: colors.cream,
     background: "rgba(245,240,232,0.04)", border: "1px solid rgba(245,240,232,0.1)",
     borderRadius: 3, padding: "13px 16px", width: "100%", boxSizing: "border-box",
     outline: "none", transition: "border-color 0.3s",
@@ -105,7 +122,7 @@ export default function QuotePage() {
     ...inputStyle,
     borderColor: fieldErrors[field] ? "rgba(224,112,96,0.6)" : "rgba(245,240,232,0.1)",
   });
-  const focus = (e) => (e.target.style.borderColor = "#C8963E");
+  const focus = (e) => (e.target.style.borderColor = colors.gold);
   const blurOf = (field) => (e) => {
     e.target.style.borderColor = fieldErrors[field] ? "rgba(224,112,96,0.6)" : "rgba(245,240,232,0.1)";
     revalidate(form);
@@ -121,12 +138,29 @@ export default function QuotePage() {
   const fieldProps = (field, extra) => ({
     id: field,
     ref: bindRef(field),
+    value: form[field],
+    onChange: set(field),
     "aria-invalid": fieldErrors[field] ? true : undefined,
     "aria-describedby": describedBy(field, extra),
     style: styleFor(field),
     onFocus: focus,
     onBlur: blurOf(field),
   });
+
+  /**
+   * A labelled single-line input with its inline error.
+   *
+   * Called as a function, not rendered as `<TextField />`: a component defined
+   * inside the render closure is a new type on every keystroke, which remounts
+   * the input and drops the caret.
+   */
+  const textField = ({ field, label, required, maxLength, ...rest }) => (
+    <div key={field}>
+      <label htmlFor={field} style={labelStyle}>{label}{required ? " *" : ""}</label>
+      <input {...fieldProps(field)} required={required} maxLength={maxLength} {...rest} />
+      <FieldError field={field} errors={fieldErrors} />
+    </div>
+  );
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -146,47 +180,47 @@ export default function QuotePage() {
   const selectSector = (s) => {
     const next = { ...form, sector: s };
     setForm(next);
-    // Selecting a sector should clear the "please select a sector" error
-    // immediately rather than waiting for a blur that may never come.
+    // Selecting a category should clear the "please select" error immediately
+    // rather than waiting for a blur that may never come.
     revalidate(next);
   };
 
   return (
-    <div style={{ background: "#071E12", minHeight: "100vh", paddingTop: 72 }}>
+    <div style={{ background: colors.forest, minHeight: "100vh", paddingTop: 72 }}>
       <section style={{ padding: "72px 24px 100px" }}>
         <div style={{ maxWidth: 780, margin: "0 auto" }}>
-          <button type="button" onClick={() => navigate(-1)} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(200,150,62,0.65)", background: "none", border: "none", cursor: "pointer", letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 32, padding: 0 }}>
+          <button type="button" onClick={() => navigate(-1)} style={{ fontFamily: fonts.sans, fontSize: 11, color: "rgba(200,150,62,0.65)", background: "none", border: "none", cursor: "pointer", letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 32, padding: 0 }}>
             ← Back
           </button>
 
           <FadeIn><SectionTag label="Request a Quote" /></FadeIn>
           <FadeIn delay={0.1}>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(30px, 4.5vw, 52px)", fontWeight: 700, color: "#F5F0E8", lineHeight: 1.1, margin: "0 0 16px" }}>
-              Tell us what<br />you <span style={{ color: "#C8963E", fontStyle: "italic" }}>need.</span>
+            <h1 style={{ fontFamily: fonts.serif, fontSize: "clamp(30px, 4.5vw, 52px)", fontWeight: 700, color: colors.cream, lineHeight: 1.1, margin: "0 0 16px" }}>
+              Tell us what you are <span style={{ color: colors.gold, fontStyle: "italic" }}>looking for.</span>
             </h1>
           </FadeIn>
           <FadeIn delay={0.15}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "rgba(245,240,232,0.42)", lineHeight: 1.75, margin: "0 0 56px", maxWidth: 500 }}>
-              Describe your requirement — sector, product, volume, destination. Our trade team responds within 24 hours.
+            <p style={{ fontFamily: fonts.sans, fontSize: 16, color: "rgba(245,240,232,0.45)", lineHeight: 1.8, margin: "0 0 56px", maxWidth: 520 }}>
+              The more detail you can provide, the more useful our response can be.
             </p>
           </FadeIn>
 
           {submitted ? (
             <FadeIn>
               <div style={{ background: "rgba(245,240,232,0.04)", border: "1px solid rgba(200,150,62,0.2)", borderRadius: 10, padding: "72px 48px", textAlign: "center" }}>
-                <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #C8963E, #A67B2E)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px" }}>
-                  <span style={{ color: "#071E12", fontSize: 32, fontWeight: 700 }}>✓</span>
+                <div style={{ width: 72, height: 72, borderRadius: "50%", background: `linear-gradient(135deg, ${colors.gold}, ${colors.goldDeep})`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px" }}>
+                  <span style={{ color: colors.forest, fontSize: 32, fontWeight: 700 }}>✓</span>
                 </div>
-                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: "#F5F0E8", margin: "0 0 14px" }}>Quote Request Received</h2>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "rgba(245,240,232,0.45)", margin: "0 0 8px", maxWidth: 420, marginLeft: "auto", marginRight: "auto" }}>
-                  Our trade team will review your requirements and respond with a detailed quotation within one business day.
+                <h2 style={{ fontFamily: fonts.serif, fontSize: 28, color: colors.cream, margin: "0 0 14px" }}>Enquiry Received</h2>
+                <p style={{ fontFamily: fonts.sans, fontSize: 16, color: "rgba(245,240,232,0.45)", margin: "0 auto", maxWidth: 440, lineHeight: 1.8 }}>
+                  We review each enquiry individually. If we can support the requirement, we will come back with the next steps.
                 </p>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(200,150,62,0.65)", marginTop: 12 }}>
-                  Sector: {form.sector}
+                <p style={{ fontFamily: fonts.sans, fontSize: 13, color: "rgba(200,150,62,0.65)", marginTop: 14 }}>
+                  Product or category: {form.sector}
                 </p>
                 <button type="button" onClick={() => navigate("/")} style={{
-                  marginTop: 32, fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600,
-                  padding: "13px 32px", background: "transparent", color: "#C8963E",
+                  marginTop: 32, fontFamily: fonts.sans, fontSize: 12, fontWeight: 600,
+                  padding: "13px 32px", background: "transparent", color: colors.gold,
                   border: "1px solid rgba(200,150,62,0.3)", borderRadius: 3, cursor: "pointer",
                   letterSpacing: "0.15em", textTransform: "uppercase",
                 }}>
@@ -196,185 +230,116 @@ export default function QuotePage() {
             </FadeIn>
           ) : (
             <FadeIn delay={0.2}>
-              <form onSubmit={onSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+              <form onSubmit={onSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: 48 }}>
 
-                {/* Sector — real radios inside a fieldset, so the group is announced
-                    as one required choice and arrow keys move between options. The
-                    inputs are visually hidden; the styled label is the pill. */}
-                <fieldset
-                  style={{ border: "none", padding: 0, margin: 0, minWidth: 0 }}
-                  aria-describedby={describedBy("sector")}
-                >
-                  <legend style={{ ...labelStyle, marginBottom: 12, padding: 0 }}>Sector *</legend>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-                    {SECTORS.map((s, i) => {
-                      const selected = form.sector === s;
-                      return (
-                        <label key={s} style={{
-                          fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500,
-                          padding: "10px 18px", borderRadius: 40, cursor: "pointer", transition: "all 0.25s",
-                          background: selected ? "rgba(200,150,62,0.15)" : "rgba(245,240,232,0.04)",
-                          border: selected ? "1px solid #C8963E" : `1px solid ${fieldErrors.sector ? "rgba(224,112,96,0.6)" : "rgba(245,240,232,0.1)"}`,
-                          color: selected ? "#C8963E" : "rgba(245,240,232,0.52)",
-                          outline: focusedSector === s ? "2px solid #C8963E" : "none",
-                          outlineOffset: 2,
-                        }}>
-                          <input
-                            type="radio"
-                            name="sector"
-                            value={s}
-                            checked={selected}
-                            required
-                            // Only the first radio needs a ref: focusing it puts
-                            // the user in the group, and arrow keys do the rest.
-                            ref={i === 0 ? bindRef("sector") : undefined}
-                            aria-invalid={fieldErrors.sector ? true : undefined}
-                            onChange={() => selectSector(s)}
-                            onFocus={() => setFocusedSector(s)}
-                            onBlur={() => setFocusedSector(null)}
-                            style={visuallyHiddenRadio}
-                          />
-                          {selected ? "✓ " : ""}{s}
-                        </label>
-                      );
-                    })}
+                <FieldSet legend="Your details">
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                    {textField({ field: "name", label: "Name", required: true, maxLength: LIMITS.NAME_MAX, autoComplete: "name", placeholder: "Your name" })}
+                    {textField({ field: "company", label: "Company", maxLength: LIMITS.COMPANY_MAX, autoComplete: "organization", placeholder: "Company Ltd." })}
                   </div>
-                  <FieldError field="sector" errors={fieldErrors} />
-                </fieldset>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                    {textField({ field: "email", label: "Work email", required: true, type: "email", maxLength: LIMITS.EMAIL_MAX, autoComplete: "email", placeholder: "you@company.com" })}
+                    {textField({ field: "phone", label: "Phone", type: "tel", maxLength: LIMITS.PHONE_MAX, autoComplete: "tel", placeholder: "+44 7XXX XXXXXX" })}
+                  </div>
+                  {textField({ field: "country", label: "Country", maxLength: LIMITS.COUNTRY_MAX, autoComplete: "country-name", placeholder: "Where you are based" })}
+                </FieldSet>
 
-                {/* Requirement description */}
-                <div>
-                  <label htmlFor="description" style={labelStyle}>What do you need? *</label>
-                  <textarea
-                    {...fieldProps("description", "description-counter")}
-                    value={form.description}
-                    onChange={set("description")}
-                    rows={4}
-                    required
-                    maxLength={LIMITS.DESCRIPTION_MAX}
-                    placeholder="e.g. 500kg Matta Rice + 200kg Toor Dall, FOB Kochi — or — 500 sets brake pads for Toyota Hilux — or — Paracetamol 500mg tablets, 1M units, WHO-GMP, for Kenya"
-                    style={{ ...styleFor("description"), resize: "vertical" }}
-                  />
-                  <FieldError field="description" errors={fieldErrors} />
-                  <p id="description-counter" style={counterStyle(form.description.length >= LIMITS.DESCRIPTION_MAX)}>
-                    {form.description.length.toLocaleString()} / {LIMITS.DESCRIPTION_MAX.toLocaleString()}
-                  </p>
-                </div>
+                <FieldSet legend="Your requirement">
+                  {/* Product or category — real radios inside a fieldset, so the
+                      group is announced as one required choice and arrow keys
+                      move between options. The inputs are visually hidden; the
+                      styled label is the pill. */}
+                  <fieldset
+                    style={{ border: "none", padding: 0, margin: 0, minWidth: 0 }}
+                    aria-describedby={describedBy("sector")}
+                  >
+                    <legend style={{ ...labelStyle, marginBottom: 12, padding: 0 }}>Product or category *</legend>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                      {SECTORS.map((s, i) => {
+                        const selected = form.sector === s;
+                        return (
+                          <label key={s} style={{
+                            fontFamily: fonts.sans, fontSize: 13, fontWeight: 500,
+                            padding: "10px 18px", borderRadius: 40, cursor: "pointer", transition: "all 0.25s",
+                            background: selected ? "rgba(200,150,62,0.15)" : "rgba(245,240,232,0.04)",
+                            border: selected ? `1px solid ${colors.gold}` : `1px solid ${fieldErrors.sector ? "rgba(224,112,96,0.6)" : "rgba(245,240,232,0.1)"}`,
+                            color: selected ? colors.gold : "rgba(245,240,232,0.52)",
+                            outline: focusedSector === s ? `2px solid ${colors.gold}` : "none",
+                            outlineOffset: 2,
+                          }}>
+                            <input
+                              type="radio"
+                              name="sector"
+                              value={s}
+                              checked={selected}
+                              required
+                              // Only the first radio needs a ref: focusing it puts
+                              // the user in the group, and arrow keys do the rest.
+                              ref={i === 0 ? bindRef("sector") : undefined}
+                              aria-invalid={fieldErrors.sector ? true : undefined}
+                              onChange={() => selectSector(s)}
+                              onFocus={() => setFocusedSector(s)}
+                              onBlur={() => setFocusedSector(null)}
+                              style={visuallyHiddenRadio}
+                            />
+                            {selected ? "✓ " : ""}{s}
+                          </label>
+                        );
+                      })}
+                    </div>
+                    <FieldError field="sector" errors={fieldErrors} />
+                  </fieldset>
 
-                {/* Contact details */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                   <div>
-                    <label htmlFor="name" style={labelStyle}>Full Name *</label>
-                    <input
-                      {...fieldProps("name")}
-                      value={form.name}
-                      onChange={set("name")}
+                    <label htmlFor="specification" style={labelStyle}>Product specification *</label>
+                    <textarea
+                      {...fieldProps("specification", "specification-counter")}
+                      rows={5}
                       required
-                      maxLength={LIMITS.NAME_MAX}
-                      autoComplete="name"
-                      placeholder="Your name"
+                      maxLength={LIMITS.SPECIFICATION_MAX}
+                      placeholder="What the product is, and any specification you already have — grade, part number, vehicle make and model, botanical source, intended use."
+                      style={{ ...styleFor("specification"), resize: "vertical" }}
                     />
-                    <FieldError field="name" errors={fieldErrors} />
+                    <FieldError field="specification" errors={fieldErrors} />
+                    <p id="specification-counter" style={counterStyle(form.specification.length >= LIMITS.SPECIFICATION_MAX)}>
+                      {form.specification.length.toLocaleString()} / {LIMITS.SPECIFICATION_MAX.toLocaleString()}
+                    </p>
                   </div>
-                  <div>
-                    <label htmlFor="email" style={labelStyle}>Email *</label>
-                    <input
-                      {...fieldProps("email")}
-                      value={form.email}
-                      onChange={set("email")}
-                      type="email"
-                      required
-                      maxLength={LIMITS.EMAIL_MAX}
-                      autoComplete="email"
-                      placeholder="you@company.com"
-                    />
-                    <FieldError field="email" errors={fieldErrors} />
-                  </div>
-                </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                  <div>
-                    <label htmlFor="company" style={labelStyle}>Company</label>
-                    <input
-                      {...fieldProps("company")}
-                      value={form.company}
-                      onChange={set("company")}
-                      maxLength={LIMITS.COMPANY_MAX}
-                      autoComplete="organization"
-                      placeholder="Company Ltd."
-                    />
-                    <FieldError field="company" errors={fieldErrors} />
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                    {textField({ field: "quantity", label: "Quantity", maxLength: LIMITS.QUANTITY_MAX, placeholder: "e.g. 500 kg, 2 × 20ft container" })}
+                    {textField({ field: "targetMarket", label: "Target market", maxLength: LIMITS.TARGET_MARKET_MAX, placeholder: "Where the product will be sold" })}
                   </div>
-                  <div>
-                    <label htmlFor="phone" style={labelStyle}>Phone</label>
-                    <input
-                      {...fieldProps("phone")}
-                      value={form.phone}
-                      onChange={set("phone")}
-                      type="tel"
-                      maxLength={LIMITS.PHONE_MAX}
-                      autoComplete="tel"
-                      placeholder="+44 7XXX XXXXXX"
-                    />
-                    <FieldError field="phone" errors={fieldErrors} />
-                  </div>
-                </div>
 
-                {/* Logistics details */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
-                  <div>
-                    <label htmlFor="volume" style={labelStyle}>Est. Volume</label>
-                    <select
-                      {...fieldProps("volume")}
-                      value={form.volume}
-                      onChange={set("volume")}
-                      style={{ ...styleFor("volume"), appearance: "none", cursor: "pointer" }}
-                    >
-                      <option value="">Select…</option>
-                      {VOLUMES.map((v) => <option key={v} value={v}>{v}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="frequency" style={labelStyle}>Frequency</label>
-                    <select
-                      {...fieldProps("frequency")}
-                      value={form.frequency}
-                      onChange={set("frequency")}
-                      style={{ ...styleFor("frequency"), appearance: "none", cursor: "pointer" }}
-                    >
-                      <option value="">Select…</option>
-                      {FREQUENCIES.map((f) => <option key={f} value={f}>{f}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="destination" style={labelStyle}>Destination</label>
-                    <input
-                      {...fieldProps("destination")}
-                      value={form.destination}
-                      onChange={set("destination")}
-                      maxLength={LIMITS.DESTINATION_MAX}
-                      placeholder="Country / Port"
-                    />
-                    <FieldError field="destination" errors={fieldErrors} />
-                  </div>
-                </div>
+                  {textField({ field: "packaging", label: "Packaging requirements", maxLength: LIMITS.PACKAGING_MAX, placeholder: "Pack size, labelling, private label" })}
 
-                <div>
-                  <label htmlFor="notes" style={labelStyle}>Additional Notes</label>
-                  <textarea
-                    {...fieldProps("notes", "notes-counter")}
-                    value={form.notes}
-                    onChange={set("notes")}
-                    rows={3}
-                    maxLength={LIMITS.NOTES_MAX}
-                    placeholder="Certifications required, Incoterms preference, special handling, packaging specs…"
-                    style={{ ...styleFor("notes"), resize: "vertical" }}
-                  />
-                  <FieldError field="notes" errors={fieldErrors} />
-                  <p id="notes-counter" style={counterStyle(form.notes.length >= LIMITS.NOTES_MAX)}>
-                    {form.notes.length.toLocaleString()} / {LIMITS.NOTES_MAX.toLocaleString()}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                    {textField({ field: "destination", label: "Target delivery location", maxLength: LIMITS.DESTINATION_MAX, placeholder: "Country / port" })}
+                    {textField({ field: "deliveryDate", label: "Target delivery date", maxLength: LIMITS.DELIVERY_DATE_MAX, placeholder: "e.g. Q3, or a date" })}
+                  </div>
+
+                  <div>
+                    <label htmlFor="notes" style={labelStyle}>Additional information</label>
+                    <textarea
+                      {...fieldProps("notes", "notes-counter")}
+                      rows={3}
+                      maxLength={LIMITS.NOTES_MAX}
+                      placeholder="Certifications required, Incoterms preference, special handling, anything else."
+                      style={{ ...styleFor("notes"), resize: "vertical" }}
+                    />
+                    <FieldError field="notes" errors={fieldErrors} />
+                    <p id="notes-counter" style={counterStyle(form.notes.length >= LIMITS.NOTES_MAX)}>
+                      {form.notes.length.toLocaleString()} / {LIMITS.NOTES_MAX.toLocaleString()}
+                    </p>
+                  </div>
+
+                  {/* The form does not accept uploads yet, so it says where to
+                      send one rather than offering a control that does nothing. */}
+                  <p style={{ fontFamily: fonts.sans, fontSize: 13, color: "rgba(245,240,232,0.4)", lineHeight: 1.8, margin: 0 }}>
+                    Have a product specification, catalogue, drawing or other supporting document? Email it to{" "}
+                    <a href={`mailto:${EMAIL}`} style={{ color: colors.gold }}>{EMAIL}</a> and mention your name so we can match it to this enquiry.
                   </p>
-                </div>
+                </FieldSet>
 
                 {/* Honeypot — see honeypotStyle. Not a real field. */}
                 <div style={honeypotStyle} aria-hidden="true">
@@ -407,19 +372,24 @@ export default function QuotePage() {
                   ) : null}
                 </div>
 
-                <button type="submit" disabled={loading} style={{
-                  fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600,
-                  padding: "18px 48px", alignSelf: "flex-start",
-                  background: loading ? "rgba(200,150,62,0.4)" : "linear-gradient(135deg, #C8963E, #A67B2E)",
-                  color: "#071E12", border: "none", borderRadius: 3, cursor: loading ? "wait" : "pointer",
-                  letterSpacing: "0.15em", textTransform: "uppercase",
-                  boxShadow: "0 4px 24px rgba(200,150,62,0.2)", transition: "all 0.3s",
-                }}
-                  onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(200,150,62,0.3)"; } }}
-                  onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(200,150,62,0.2)"; }}
-                >
-                  {loading ? "Submitting…" : "Submit Quote Request"}
-                </button>
+                <div>
+                  <button type="submit" disabled={loading} style={{
+                    fontFamily: fonts.sans, fontSize: 13, fontWeight: 600,
+                    padding: "18px 48px",
+                    background: loading ? "rgba(200,150,62,0.4)" : `linear-gradient(135deg, ${colors.gold}, ${colors.goldDeep})`,
+                    color: colors.forest, border: "none", borderRadius: 3, cursor: loading ? "wait" : "pointer",
+                    letterSpacing: "0.15em", textTransform: "uppercase",
+                    boxShadow: "0 4px 24px rgba(200,150,62,0.2)", transition: "all 0.3s",
+                  }}
+                    onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(200,150,62,0.3)"; } }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(200,150,62,0.2)"; }}
+                  >
+                    {loading ? "Submitting…" : "Submit Enquiry"}
+                  </button>
+                  <p style={{ fontFamily: fonts.sans, fontSize: 13, color: "rgba(245,240,232,0.35)", lineHeight: 1.8, marginTop: 20, maxWidth: 520 }}>
+                    We review each enquiry individually. If we can support the requirement, we will come back with the next steps.
+                  </p>
+                </div>
               </form>
             </FadeIn>
           )}

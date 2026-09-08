@@ -1,24 +1,25 @@
 import { describe, it, expect } from 'vitest'
-import { screen, fireEvent } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { server } from './server'
 import { serverError } from './handlers'
-import Home from '../pages/Home'
+import Contact from '../pages/Contact'
 import { renderWithProviders } from './renderWithProviders'
 
 async function fillContact(user) {
   await user.type(screen.getByLabelText(/^Name/), 'Sam Okafor')
-  await user.type(screen.getByLabelText(/^Email/), 'sam@example.com')
+  await user.type(screen.getByLabelText(/Work email/), 'sam@example.com')
   await user.type(screen.getByLabelText(/^Message/), 'We would like to discuss a recurring supply arrangement.')
 }
 
-describe('Home contact form', () => {
-  it('has a single h1 and reacts to a scroll event without crashing', () => {
-    renderWithProviders(<Home />)
+describe('Contact page form', () => {
+  it('has a single h1 and shows both the buyer and supplier prompts', () => {
+    renderWithProviders(<Contact />)
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
-    fireEvent.scroll(window) // exercise the scroll-journey progress handler
-    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
+    expect(screen.getByText(/Tell us what you need, where you need it/)).toBeInTheDocument()
+    expect(screen.getByText(/Tell us what you manufacture/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'enquiries@aurelialogistics.co.uk' })).toBeInTheDocument()
   })
 
   it('submits successfully and shows the confirmation', async () => {
@@ -30,12 +31,12 @@ describe('Home contact form', () => {
       }),
     )
     const user = userEvent.setup()
-    renderWithProviders(<Home />)
+    renderWithProviders(<Contact />)
     await fillContact(user)
 
-    await user.click(screen.getByRole('button', { name: /Send Message/i }))
+    await user.click(screen.getByRole('button', { name: /Send an Enquiry/i }))
 
-    expect(await screen.findByText('Message Sent')).toBeInTheDocument()
+    expect(await screen.findByText('Enquiry Sent')).toBeInTheDocument()
     expect(captured.name).toBe('Sam Okafor')
     expect(captured.email).toBe('sam@example.com')
   })
@@ -44,9 +45,9 @@ describe('Home contact form', () => {
     let hit = false
     server.use(http.post('*/api/contact/', () => { hit = true; return HttpResponse.json({}) }))
     const user = userEvent.setup()
-    renderWithProviders(<Home />)
+    renderWithProviders(<Contact />)
 
-    await user.click(screen.getByRole('button', { name: /Send Message/i }))
+    await user.click(screen.getByRole('button', { name: /Send an Enquiry/i }))
 
     expect(screen.getByText('Please enter your name.')).toBeInTheDocument()
     expect(screen.getByText(/Please correct the/)).toBeInTheDocument()
@@ -56,15 +57,15 @@ describe('Home contact form', () => {
   it('surfaces a server error and preserves the entered data', async () => {
     server.use(serverError('/api/contact/'))
     const user = userEvent.setup()
-    renderWithProviders(<Home />)
+    renderWithProviders(<Contact />)
     await fillContact(user)
 
-    await user.click(screen.getByRole('button', { name: /Send Message/i }))
+    await user.click(screen.getByRole('button', { name: /Send an Enquiry/i }))
 
     expect(await screen.findByText(/Submission failed/)).toBeInTheDocument()
     expect(screen.getByLabelText(/^Message/)).toHaveValue(
       'We would like to discuss a recurring supply arrangement.',
     )
-    expect(screen.queryByText('Message Sent')).not.toBeInTheDocument()
+    expect(screen.queryByText('Enquiry Sent')).not.toBeInTheDocument()
   })
 })

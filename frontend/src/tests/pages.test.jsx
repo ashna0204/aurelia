@@ -2,88 +2,104 @@ import { describe, it, expect } from 'vitest'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from './renderWithProviders'
-import Specialisations from '../pages/Specialisations'
-import EthnicFood from '../pages/EthnicFood'
-import VehicleParts from '../pages/VehicleParts'
-import Pharmaceuticals from '../pages/Pharmaceuticals'
+import About from '../pages/About'
+import Expertise from '../pages/Expertise'
+import FoodGrocery from '../pages/FoodGrocery'
+import FoodCatalogue from '../pages/FoodCatalogue'
+import Sahya from '../pages/Sahya'
+import Automotive from '../pages/Automotive'
+import Healthcare from '../pages/Healthcare'
+import Perfume from '../pages/Perfume'
+import Privacy from '../pages/Privacy'
+import Terms from '../pages/Terms'
 import NotFound from '../pages/NotFound'
 
 function singleH1() {
   return screen.getAllByRole('heading', { level: 1 })
 }
 
-describe('Specialisations', () => {
-  it('renders one h1 and the three sector cards with alt-texted images', () => {
-    renderWithProviders(<Specialisations />)
+describe('every content page', () => {
+  it.each([
+    ['About', About],
+    ['Expertise', Expertise],
+    ['FoodGrocery', FoodGrocery],
+    ['FoodCatalogue', FoodCatalogue],
+    ['Sahya', Sahya],
+    ['Automotive', Automotive],
+    ['Healthcare', Healthcare],
+    ['Perfume', Perfume],
+    ['Privacy', Privacy],
+    ['Terms', Terms],
+  ])('%s renders exactly one h1', (_name, Page) => {
+    renderWithProviders(<Page />)
     expect(singleH1()).toHaveLength(1)
+  })
+})
+
+describe('Expertise', () => {
+  it('renders all four sourcing areas with alt-texted images', () => {
+    renderWithProviders(<Expertise />)
 
     const images = screen.getAllByRole('img')
-    expect(images).toHaveLength(3)
+    expect(images).toHaveLength(4)
     for (const img of images) expect(img).toHaveAccessibleName()
-    expect(screen.getByAltText('Ethnic Food & Grocery')).toBeInTheDocument()
+    expect(screen.getByAltText('Food & Grocery')).toBeInTheDocument()
+    expect(screen.getByAltText('Perfume Ingredients & Essential Oils')).toBeInTheDocument()
   })
 
-  it('navigates when a sector card is clicked', async () => {
+  it('navigates when an area card is clicked', async () => {
     const user = userEvent.setup()
-    renderWithProviders(<Specialisations />)
-    // Clicking the card fires navigate — assert it does not throw.
-    await user.click(screen.getByText('Vehicle Parts & Accessories'))
+    renderWithProviders(<Expertise />)
+    await user.click(screen.getByRole('heading', { name: 'Automotive Components' }))
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
   })
 })
 
-describe('EthnicFood', () => {
-  it('renders the hero, Sahya feature, and default catalogue category', () => {
-    renderWithProviders(<EthnicFood />)
-    expect(singleH1()).toHaveLength(1)
-    expect(screen.getByText('Sahya.')).toBeInTheDocument()
+describe('FoodCatalogue', () => {
+  it('renders the default category with no prices', () => {
+    renderWithProviders(<FoodCatalogue />)
     // Default category is Grains & Flour → Matta Rice is on screen.
     expect(screen.getByText('Matta Rice')).toBeInTheDocument()
+    expect(screen.getAllByText('Price on request').length).toBeGreaterThan(0)
+    expect(screen.queryByText(/\$/)).not.toBeInTheDocument()
   })
 
-  it('switches catalogue category when a tab is clicked', async () => {
+  it('switches category when a tab is clicked', async () => {
     const user = userEvent.setup()
-    renderWithProviders(<EthnicFood />)
+    renderWithProviders(<FoodCatalogue />)
 
     expect(screen.queryByText('Toor Dall')).not.toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /Pulses & Legumes/ }))
+    await user.click(screen.getByRole('button', { name: 'Pulses & Legumes' }))
     expect(screen.getByText('Toor Dall')).toBeInTheDocument()
     expect(screen.queryByText('Matta Rice')).not.toBeInTheDocument()
   })
-})
 
-describe('VehicleParts', () => {
-  it('renders one h1 and all six category cards', () => {
-    renderWithProviders(<VehicleParts />)
-    expect(singleH1()).toHaveLength(1)
-    expect(screen.getByText('Braking Systems')).toBeInTheDocument()
-    expect(screen.getByText('Filtration')).toBeInTheDocument()
-  })
-
-  it('expands and collapses a category card', async () => {
-    const user = userEvent.setup()
-    renderWithProviders(<VehicleParts />)
-    const card = screen.getByText('Braking Systems')
-
-    await user.click(card) // open
-    await user.click(card) // collapse — exercises both sides of the toggle
-    expect(card).toBeInTheDocument()
+  it('states that the catalogue is indicative', () => {
+    renderWithProviders(<FoodCatalogue />)
+    expect(screen.getByText(/The catalogue is indicative/)).toBeInTheDocument()
   })
 })
 
-describe('Pharmaceuticals', () => {
-  it('renders one h1, the certifications, and the categories', () => {
-    renderWithProviders(<Pharmaceuticals />)
-    expect(singleH1()).toHaveLength(1)
-    expect(screen.getByText('WHO-GMP')).toBeInTheDocument()
-    expect(screen.getByText('Generic Medicines')).toBeInTheDocument()
+describe('Automotive', () => {
+  it('renders the category cards from the rewrite', () => {
+    renderWithProviders(<Automotive />)
+    expect(screen.getByText('Braking components')).toBeInTheDocument()
+    expect(screen.getByText('Other vehicle-specific components')).toBeInTheDocument()
+  })
+})
+
+describe('Healthcare', () => {
+  it('leads with the compliance qualifier before any category', () => {
+    renderWithProviders(<Healthcare />)
+    const qualifier = screen.getByText(/The suitability of any product depends on the destination market/)
+    const category = screen.getByText('Finished formulations')
+    expect(qualifier.compareDocumentPosition(category) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
-  it('toggles a category card open', async () => {
-    const user = userEvent.setup()
-    renderWithProviders(<Pharmaceuticals />)
-    await user.click(screen.getByText('Nutraceuticals'))
-    expect(screen.getByText('Nutraceuticals')).toBeInTheDocument()
+  it('makes no blanket certification claim', () => {
+    renderWithProviders(<Healthcare />)
+    expect(screen.queryByText(/WHO-GMP/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/USFDA/)).not.toBeInTheDocument()
   })
 })
 
@@ -92,6 +108,6 @@ describe('NotFound', () => {
     renderWithProviders(<NotFound />)
     expect(singleH1()).toHaveLength(1)
     expect(screen.getByRole('link', { name: /Back to Home/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Our Specialisations/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Areas of Expertise/i })).toBeInTheDocument()
   })
 })

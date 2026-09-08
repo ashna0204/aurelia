@@ -1,166 +1,224 @@
-// ─── Ethnic Food — Unifarex dry goods price sheet ───
+/**
+ * Catalogue and category data for the four sourcing areas.
+ *
+ * Nothing here states a price, a certification, a supplier name or a volume.
+ * Those are commercial facts that change per enquiry and per destination
+ * market, so the pages ask for them rather than publishing them — see the
+ * catalogue note on the Food Catalogue page.
+ */
 
-export const ETHNIC_FOOD_CATEGORIES = [
+// ─── Food & Grocery catalogue ───
+//
+// Pack sizes are the one commercial detail carried here, because they describe
+// the product rather than the deal. Origin, minimum order, packaging and
+// availability are confirmed against each enquiry, so they render as
+// "On request" rather than being invented per line.
+
+export const FOOD_CATEGORIES = [
   {
     key: "grains",
     label: "Grains & Flour",
-    description: "Kerala's staple grains and milled flours — Matta rice, rice-based powders, and traditional batters.",
+    description: "Staple grains and milled flours, including Matta rice, rice-based powders and traditional batter mixes.",
     products: [
-      { name: "Matta Rice", pkg: "10 kg", price: "$8.10" },
-      { name: "Rice Powder", pkg: "1 kg", price: "$1.35" },
-      { name: "Puttu Podi", pkg: "1 kg", price: "$1.52" },
-      { name: "Idiyappam Powder", pkg: "1 kg", price: "$1.36" },
-      { name: "Palappam", pkg: "1 kg", price: "$2.44" },
-      { name: "Maida", pkg: "1 kg", price: "$0.94" },
-      { name: "Broken Matta", pkg: "1 kg", price: "$1.46" },
-      { name: "Roasted Rava", pkg: "1 kg", price: "$1.06" },
-      { name: "Urid Gota", pkg: "1 kg", price: "$2.99" },
-      { name: "Ragi Whole", pkg: "1 kg", price: "$1.24" },
-      { name: "Aval White", pkg: "1 kg", price: "$1.65" },
+      { name: "Matta Rice", pack: "10 kg" },
+      { name: "Rice Powder", pack: "1 kg" },
+      { name: "Puttu Podi", pack: "1 kg" },
+      { name: "Idiyappam Powder", pack: "1 kg" },
+      { name: "Palappam", pack: "1 kg" },
+      { name: "Maida", pack: "1 kg" },
+      { name: "Broken Matta", pack: "1 kg" },
+      { name: "Roasted Rava", pack: "1 kg" },
+      { name: "Urid Gota", pack: "1 kg" },
+      { name: "Ragi Whole", pack: "1 kg" },
+      { name: "Aval White", pack: "1 kg" },
     ],
   },
   {
     key: "pulses",
     label: "Pulses & Legumes",
-    description: "Dried legumes sourced from India's leading growing belts — the backbone of South Asian cooking.",
+    description: "Dried legumes sourced through our supplier network across India's growing belts.",
     products: [
-      { name: "Red Cow Peas", pkg: "1 kg", price: "$2.15" },
-      { name: "Toor Dall", pkg: "1 kg", price: "$3.18" },
-      { name: "Black Gram", pkg: "1 kg", price: "$2.24" },
-      { name: "Green Peas", pkg: "1 kg", price: "$2.46" },
-      { name: "White Kadala", pkg: "1 kg", price: "$2.51" },
+      { name: "Red Cow Peas", pack: "1 kg" },
+      { name: "Toor Dall", pack: "1 kg" },
+      { name: "Black Gram", pack: "1 kg" },
+      { name: "Green Peas", pack: "1 kg" },
+      { name: "White Kadala", pack: "1 kg" },
     ],
   },
   {
     key: "sweeteners",
     label: "Sweeteners & Specialties",
-    description: "Traditional jaggery from Marayoor, dried tapioca, and artisan vermicelli — hard-to-source Kerala staples.",
+    description: "Jaggery, dried tapioca and vermicelli — regional staples that are harder to source at wholesale.",
     products: [
-      { name: "Jaggery Marayoor", pkg: "1 kg", price: "$2.40" },
-      { name: "Dried Tapioca", pkg: "1 kg", price: "$2.33" },
-      { name: "Jaggery Powder", pkg: "500 g", price: "$2.11" },
-      { name: "Roasted Vermicelli", pkg: "400 g", price: "$2.84" },
+      { name: "Jaggery Marayoor", pack: "1 kg" },
+      { name: "Dried Tapioca", pack: "1 kg" },
+      { name: "Jaggery Powder", pack: "500 g" },
+      { name: "Roasted Vermicelli", pack: "400 g" },
     ],
   },
   {
     key: "snacks",
     label: "Snacks & Confections",
-    description: "Authentic Kerala snacks and traditional sweets — from banana chips to sesame balls.",
+    description: "South Indian snacks and traditional sweets, from banana chips to sesame balls.",
     products: [
-      { name: "Pappadom", pkg: "200 g", price: "$0.92" },
-      { name: "Kerala Mixture", pkg: "200 g", price: "$0.86" },
-      { name: "Banana Chips", pkg: "200 g", price: "$0.98" },
-      { name: "Pakkavada", pkg: "200 g", price: "$1.00" },
-      { name: "Tomato Murukku", pkg: "150 g", price: "$1.00" },
-      { name: "Rice Murukku", pkg: "150 g", price: "$1.00" },
-      { name: "Garlic Murukku", pkg: "150 g", price: "$0.87" },
-      { name: "Jackfruit Chips", pkg: "200 g", price: "$0.87" },
-      { name: "Peanut Candy Bar", pkg: "150 g", price: "$1.20" },
-      { name: "Sesame Ball", pkg: "150 g", price: "$1.16" },
-      { name: "Peanut Candy Ball", pkg: "150 g", price: "$1.20" },
+      { name: "Pappadom", pack: "200 g" },
+      { name: "Kerala Mixture", pack: "200 g" },
+      { name: "Banana Chips", pack: "200 g" },
+      { name: "Pakkavada", pack: "200 g" },
+      { name: "Tomato Murukku", pack: "150 g" },
+      { name: "Rice Murukku", pack: "150 g" },
+      { name: "Garlic Murukku", pack: "150 g" },
+      { name: "Jackfruit Chips", pack: "200 g" },
+      { name: "Peanut Candy Bar", pack: "150 g" },
+      { name: "Sesame Ball", pack: "150 g" },
+      { name: "Peanut Candy Ball", pack: "150 g" },
     ],
   },
   {
     key: "mixes",
     label: "Instant Mixes",
-    description: "Ready-to-cook traditional payasam mixes — convenience without compromise.",
+    description: "Ready-to-cook payasam mixes for retail and foodservice formats.",
     products: [
-      { name: "Instant Ada Pradhaman Payasam Mix", pkg: "200 g", price: "$0.85" },
-      { name: "Instant Semiya Payasam Mix", pkg: "200 g", price: "$0.82" },
+      { name: "Instant Ada Pradhaman Payasam Mix", pack: "200 g" },
+      { name: "Instant Semiya Payasam Mix", pack: "200 g" },
     ],
   },
   {
     key: "pickles",
     label: "Pickles & Condiments",
-    description: "Sun-dried and stone-ground condiments — from fiery mango pickles to Coconut Chutney Powder.",
+    description: "Pickles, chutney powders and other regional condiments.",
     products: [
-      { name: "Cut Mango Pickle", pkg: "400 g", price: "$2.61" },
-      { name: "Lime Pickle", pkg: "400 g", price: "$1.82" },
-      { name: "Hot & Sweet Pickle", pkg: "400 g", price: "$2.24" },
-      { name: "Tender Mango Pickle", pkg: "400 g", price: "$2.71" },
-      { name: "Coconut Chutney Powder", pkg: "400 g", price: "$4.63" },
+      { name: "Cut Mango Pickle", pack: "400 g" },
+      { name: "Lime Pickle", pack: "400 g" },
+      { name: "Hot & Sweet Pickle", pack: "400 g" },
+      { name: "Tender Mango Pickle", pack: "400 g" },
+      { name: "Coconut Chutney Powder", pack: "400 g" },
     ],
   },
 ];
 
-// ─── Vehicle Parts ───
+/**
+ * The fields shown on every catalogue card, in order.
+ *
+ * `key` is looked up on the product first; anything the product does not carry
+ * falls back to the placeholder, which is the honest answer for a commercial
+ * term that is only settled against a specific enquiry.
+ */
+export const CATALOGUE_FIELDS = [
+  { key: "pack", label: "Pack size", fallback: "On request" },
+  { key: "origin", label: "Origin", fallback: "India" },
+  { key: "moq", label: "Minimum order", fallback: "On request" },
+  { key: "packaging", label: "Packaging", fallback: "On request" },
+  { key: "availability", label: "Availability", fallback: "On enquiry" },
+];
 
-export const VEHICLE_PARTS_CATEGORIES = [
-  {
-    key: "tyres",
-    label: "Tyres & Wheels",
-    description: "Commercial and passenger tyres from India's leading manufacturers — truck, LCV, car, and two-wheeler.",
-    items: ["Heavy-duty truck tyres", "LCV & van tyres", "Passenger car tyres", "Two-wheeler tyres", "Alloy & steel wheels", "Agricultural tyres"],
-  },
+// ─── Automotive Components ───
+
+export const AUTOMOTIVE_CATEGORIES = [
   {
     key: "braking",
-    label: "Braking Systems",
-    description: "OEM-quality brake components for all vehicle categories — sourced from certified Indian manufacturers.",
-    items: ["Brake pads (disc & drum)", "Brake discs & rotors", "Brake drums", "Brake shoes", "Brake master cylinders", "ABS sensors"],
+    label: "Braking components",
+    description: "Brake components sourced against the buyer's vehicle application and required specification.",
+    items: ["Brake pads (disc & drum)", "Brake discs & rotors", "Brake drums", "Brake shoes", "Master cylinders", "ABS sensors"],
   },
   {
     key: "engine",
-    label: "Engine & Drivetrain",
-    description: "Precision-machined engine internals and drivetrain components for commercial and passenger vehicles.",
-    items: ["Clutch plates & pressure plates", "Timing belts & chains", "Engine gaskets & seals", "Pistons & rings", "Crankshafts & camshafts", "CV joints & axles"],
+    label: "Engine components",
+    description: "Engine internals and drivetrain parts for commercial, passenger and two-wheeler applications.",
+    items: ["Clutch plates & pressure plates", "Timing belts & chains", "Gaskets & seals", "Pistons & rings", "Crankshafts & camshafts", "CV joints & axles"],
+  },
+  {
+    key: "electrical",
+    label: "Electrical parts",
+    description: "Automotive electrical and electronic components, from batteries through to lighting assemblies.",
+    items: ["Batteries", "Alternators & starters", "Spark plugs & glow plugs", "Engine management sensors", "Wiring harnesses", "Lighting assemblies"],
   },
   {
     key: "filtration",
     label: "Filtration",
-    description: "Full range of engine and cabin filtration products meeting international OEM specifications.",
-    items: ["Oil filters", "Air filters (panel & cylindrical)", "Fuel filters", "Cabin air filters", "Hydraulic filters", "Transmission filters"],
+    description: "Engine, cabin and hydraulic filtration, matched to the part number or application you supply.",
+    items: ["Oil filters", "Air filters", "Fuel filters", "Cabin air filters", "Hydraulic filters", "Transmission filters"],
   },
   {
-    key: "electrical",
-    label: "Electrical & Electronics",
-    description: "Automotive electrical components from batteries to ECU sensors — all major vehicle platforms covered.",
-    items: ["Lead-acid & AGM batteries", "Alternators & starters", "Spark plugs & glow plugs", "Engine management sensors", "Wiring harnesses", "LED lighting assemblies"],
+    key: "tyres",
+    label: "Tyres",
+    description: "Commercial, passenger, two-wheeler and agricultural tyres, sized to the buyer's requirement.",
+    items: ["Truck tyres", "LCV & van tyres", "Passenger car tyres", "Two-wheeler tyres", "Agricultural tyres", "Alloy & steel wheels"],
   },
   {
-    key: "bodyparts",
-    label: "Body Parts & Glass",
-    description: "Replacement body panels and safety glass for commercial and passenger vehicles.",
-    items: ["Bumpers (front & rear)", "Door panels & skins", "Bonnet panels", "Windscreens & rear glass", "Side mirrors", "Grilles & headlamp housings"],
+    key: "body",
+    label: "Body and exterior parts",
+    description: "Replacement body panels, glass and exterior fittings for commercial and passenger vehicles.",
+    items: ["Bumpers", "Door panels & skins", "Bonnet panels", "Windscreens & rear glass", "Side mirrors", "Grilles & headlamp housings"],
+  },
+  {
+    key: "other",
+    label: "Other vehicle-specific components",
+    description: "Parts outside the categories above are assessed against the vehicle, market and specification you give us.",
+    items: ["Suspension & steering", "Cooling & thermal", "Exhaust & emissions", "Transmission parts", "Cabin & interior fittings", "Accessories"],
   },
 ];
 
-// ─── Pharmaceuticals ───
+// ─── Healthcare & Pharmaceuticals ───
+//
+// Presented as *potential* categories: whether any of these can be supplied
+// depends on the destination market, the product's classification there and the
+// manufacturer's credentials for that transaction.
 
-export const PHARMA_CATEGORIES = [
+export const HEALTHCARE_CATEGORIES = [
   {
-    key: "generics",
-    label: "Generic Medicines",
-    description: "WHO-GMP certified generic formulations across key therapeutic areas — antibiotics, analgesics, cardiovascular, and more.",
-    items: ["Antibiotics (oral & injectable)", "Analgesics & anti-inflammatories", "Anti-hypertensives", "Anti-diabetics", "Anti-malarials", "Antihistamines"],
+    key: "formulations",
+    label: "Finished formulations",
+    description: "Finished dosage products, subject to classification and approval in the destination market.",
   },
   {
-    key: "ayurvedic",
-    label: "Ayurvedic & Herbal",
-    description: "Traditional Ayurvedic formulations and certified herbal preparations from Kerala's established manufacturers.",
-    items: ["Classical Ayurvedic preparations", "Proprietary herbal formulations", "Medicated oils & ghee", "Herbal extracts & tinctures", "Ashwagandha & adaptogen blends", "Triphala & digestive preparations"],
+    key: "apis",
+    label: "APIs and pharmaceutical ingredients",
+    description: "Active ingredients and intermediates for manufacturers, assessed against the required specification.",
   },
   {
     key: "nutraceuticals",
     label: "Nutraceuticals",
-    description: "Health and wellness supplements manufactured to international quality standards.",
-    items: ["Multivitamin & mineral complexes", "Omega-3 & fish oils", "Protein supplements", "Probiotics & prebiotics", "Iron & folate supplements", "Vitamin D & calcium combinations"],
+    description: "Supplements and wellness products, where the destination market permits the product and its claims.",
   },
   {
-    key: "consumables",
-    label: "Medical Consumables",
-    description: "Disposable medical supplies and personal protective equipment for healthcare providers and distributors.",
-    items: ["Disposable gloves (latex & nitrile)", "Syringes & needles", "IV administration sets", "Wound care & bandages", "Surgical masks & PPE", "Diagnostic test kits"],
+    key: "ayurvedic",
+    label: "Ayurvedic products",
+    description: "Traditional preparations, subject to how the destination market classifies and regulates them.",
   },
   {
-    key: "apis",
-    label: "Active Pharmaceutical Ingredients",
-    description: "High-purity APIs for drug manufacturers — sourced from USFDA and EU-GMP certified Indian facilities.",
-    items: ["Analgesic APIs (Paracetamol, Ibuprofen)", "Antibiotic intermediates", "Cardiovascular APIs", "Anti-diabetic APIs (Metformin)", "Steroidal APIs", "Vitamin & amino acid APIs"],
+    key: "supplies",
+    label: "Medical and healthcare supplies",
+    description: "Consumables and related supplies, where permitted and appropriately classified.",
+  },
+];
+
+// ─── Perfume Ingredients & Essential Oils ───
+
+export const PERFUME_CATEGORIES = [
+  {
+    key: "essential-oils",
+    label: "Essential oils",
+    description: "Steam-distilled and expressed oils, sourced against botanical source, origin and grade.",
   },
   {
-    key: "otc",
-    label: "Over-the-Counter Products",
-    description: "Branded and white-label OTC products ready for retail distribution.",
-    items: ["Cold & flu preparations", "Digestive health products", "Topical creams & ointments", "Eye & ear drops", "Antiseptic & disinfectants", "Oral care products"],
+    key: "extracts",
+    label: "Botanical extracts",
+    description: "Extracts and concretes for fragrance, cosmetic and personal care applications.",
+  },
+  {
+    key: "aromatics",
+    label: "Aromatic ingredients",
+    description: "Aromatic raw materials matched to the specification and intended application you supply.",
+  },
+  {
+    key: "fragrance-materials",
+    label: "Natural fragrance materials",
+    description: "Natural materials for perfumery, home fragrance and related uses.",
+  },
+  {
+    key: "carriers",
+    label: "Carrier and base materials",
+    description: "Selected carrier and base materials, subject to specification and supplier availability.",
   },
 ];

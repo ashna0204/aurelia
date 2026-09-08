@@ -27,13 +27,13 @@ export default function NotFound() {
               }}>
                 Back to Home
               </Link>
-              <Link to="/specialisations" style={{
+              <Link to="/expertise" style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, textDecoration: "none",
                 padding: "15px 36px", background: "transparent", color: "#C8963E",
                 border: "1px solid rgba(200,150,62,0.3)", borderRadius: 3,
                 letterSpacing: "0.15em", textTransform: "uppercase",
               }}>
-                Our Specialisations
+                Areas of Expertise
               </Link>
             </div>
           </FadeIn>

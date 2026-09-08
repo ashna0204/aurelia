@@ -1,26 +1,32 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSmartNavigate } from "../hooks/useSmartNavigate";
 import Logo from "./Logo";
+import { EXPERTISE, expertisePath } from "../constants/expertise";
+
+// The four sourcing areas plus Sahya sit under Areas of Expertise rather than
+// in the bar itself: the rewrite's recommended navigation lists ten
+// destinations, and ten uppercase links do not fit a 72px bar legibly.
+const EXPERTISE_CHILDREN = [
+  ...EXPERTISE.map((area) => ({ label: area.label, to: expertisePath(area.slug) })),
+  { label: "Sahya", to: "/sahya" },
+];
 
 const LINKS = [
   { label: "Home", to: "/" },
-  { label: "About", to: "/#about" },
-  { label: "Specialisations", to: "/specialisations" },
-  { label: "Quote", to: "/quote" },
-  { label: "Contact", to: "/#contact" },
+  { label: "About", to: "/about" },
+  { label: "Areas of Expertise", to: "/expertise", children: EXPERTISE_CHILDREN },
+  { label: "Request a Quote", to: "/quote" },
+  { label: "Contact", to: "/contact" },
 ];
-
-// In-page anchor targets, top-to-bottom. Matched against whichever section is
-// in view on the home page; the ids live on the sections in Home.jsx.
-const HOME_SECTIONS = ["home", "about", "contact"];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState("home");
+  const [openDropdown, setOpenDropdown] = useState(null);
   const location = useLocation();
   const go = useSmartNavigate();
+  const dropdownRef = useRef(null);
 
   const onHome = location.pathname === "/";
 
@@ -30,62 +36,40 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", h);
   }, []);
 
-  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
-
-  // Scroll-spy: on the home page, highlight whichever section is most in view.
-  // IntersectionObserver reports real visibility, which — unlike a scroll-offset
-  // marker — correctly tracks the final section even though it sits at the very
-  // bottom and never reaches the top of the viewport. Off the home page the
-  // sections don't exist, so this is a no-op.
   useEffect(() => {
-    if (!onHome) return;
-    const els = HOME_SECTIONS
-      .map((id) => document.getElementById(id))
-      .filter(Boolean);
-    if (els.length === 0) return;
+    setMenuOpen(false);
+    setOpenDropdown(null);
+  }, [location.pathname]);
 
-    const ratios = new Map(HOME_SECTIONS.map((id) => [id, 0]));
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          ratios.set(entry.target.id, entry.isIntersecting ? entry.intersectionRatio : 0);
-        }
-        // The most-visible section wins; ties resolve to the topmost. When
-        // nothing tracked is on screen (e.g. the tall between-sections regions)
-        // the last active section is left in place.
-        let best = null;
-        let bestRatio = 0;
-        for (const id of HOME_SECTIONS) {
-          const r = ratios.get(id) ?? 0;
-          if (r > bestRatio) {
-            bestRatio = r;
-            best = id;
-          }
-        }
-        if (best) setActiveSection(best);
-      },
-      { threshold: [0, 0.25, 0.5, 0.75, 1] },
-    );
-    els.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [onHome]);
+  // A click anywhere else closes an open dropdown — without this it stays open
+  // over whatever the user was actually trying to reach.
+  useEffect(() => {
+    if (!openDropdown) return;
+    const onDocClick = (e) => {
+      if (!dropdownRef.current?.contains(e.target)) setOpenDropdown(null);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [openDropdown]);
 
   const handleNav = (e, to) => {
     e.preventDefault();
     setMenuOpen(false);
+    setOpenDropdown(null);
     go(to);
   };
 
-  const isActive = (to) => {
-    // In-page anchors ("/#about") light up only on the home page, and only
-    // when their section is the one currently in view — never on other routes.
-    const hash = to.split("#")[1];
-    if (hash) return onHome && activeSection === hash;
-    // The Home link owns the top-of-page section, not the whole route.
-    if (to === "/") return onHome && activeSection === "home";
-    // Real routes match by path prefix, covering nested pages.
-    return location.pathname.startsWith(to);
-  };
+  // Routes match by path prefix, so a sub-page keeps its parent lit. Home owns
+  // only "/" — a prefix match there would light it on every route.
+  const isActive = (to) => (to === "/" ? onHome : location.pathname.startsWith(to));
+
+  const linkStyle = (to) => ({
+    textDecoration: "none", fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 500,
+    color: isActive(to) ? "#C8963E" : "rgba(245,240,232,0.7)",
+    letterSpacing: "0.18em", textTransform: "uppercase", transition: "color 0.3s",
+    borderBottom: isActive(to) ? "1px solid #C8963E" : "1px solid transparent", paddingBottom: 3,
+    whiteSpace: "nowrap",
+  });
 
   return (
     <nav style={{
@@ -105,20 +89,74 @@ export default function Navbar() {
           <span style={{ fontFamily: "'Cinzel', serif", fontWeight: 600, fontSize: 20, letterSpacing: "0.42em", textTransform: "uppercase", color: "#E8C547" }}>AURELIA</span>
         </Link>
 
-        <div style={{ display: "flex", gap: 32, alignItems: "center" }} className="desk-nav">
-          {LINKS.map(({ label, to }) => (
-            <a key={label} href={to} onClick={(e) => handleNav(e, to)} style={{
-              textDecoration: "none", fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 500,
-              color: isActive(to) ? "#C8963E" : "rgba(245,240,232,0.7)",
-              letterSpacing: "0.18em", textTransform: "uppercase", transition: "color 0.3s",
-              borderBottom: isActive(to) ? "1px solid #C8963E" : "1px solid transparent", paddingBottom: 3,
-            }}>
-              {label}
-            </a>
-          ))}
+        <div style={{ display: "flex", gap: 26, alignItems: "center" }} className="desk-nav">
+          {LINKS.map(({ label, to, children }) =>
+            children ? (
+              <div
+                key={label}
+                ref={openDropdown === label ? dropdownRef : undefined}
+                style={{ position: "relative" }}
+                onMouseEnter={() => setOpenDropdown(label)}
+                onMouseLeave={() => setOpenDropdown(null)}
+                // Focus opens it too, so the sub-pages are reachable by
+                // keyboard — hover alone would strand them. React's onFocus /
+                // onBlur are focusin / focusout, so they fire for descendants;
+                // relatedTarget is where focus went, and a move within the
+                // group must not close the panel out from under it.
+                onFocus={() => setOpenDropdown(label)}
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget)) setOpenDropdown(null);
+                }}
+              >
+                <a
+                  href={to}
+                  onClick={(e) => handleNav(e, to)}
+                  aria-haspopup="true"
+                  aria-expanded={openDropdown === label}
+                  style={{ ...linkStyle(to), display: "inline-flex", alignItems: "center", gap: 6 }}
+                >
+                  {label}
+                  <span style={{ fontSize: 8, opacity: 0.7 }}>▾</span>
+                </a>
+                {openDropdown === label && (
+                  <div style={{
+                    position: "absolute", top: "100%", left: 0, paddingTop: 14, minWidth: 280,
+                  }}>
+                    <div style={{
+                      background: "rgba(5,21,14,0.98)", backdropFilter: "blur(16px)",
+                      border: "1px solid rgba(200,150,62,0.15)", borderRadius: 6,
+                      padding: "10px 0", boxShadow: "0 16px 40px rgba(0,0,0,0.45)",
+                    }}>
+                      {children.map((child) => (
+                        <a key={child.to} href={child.to} onClick={(e) => handleNav(e, child.to)} style={{
+                          display: "block", textDecoration: "none",
+                          fontFamily: "'DM Sans', sans-serif", fontSize: 12.5,
+                          color: location.pathname.startsWith(child.to) ? "#C8963E" : "rgba(245,240,232,0.72)",
+                          padding: "10px 22px", letterSpacing: "0.04em", transition: "color 0.25s, background 0.25s",
+                        }}
+                          onMouseEnter={(e) => { e.currentTarget.style.color = "#C8963E"; e.currentTarget.style.background = "rgba(200,150,62,0.07)"; }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = location.pathname.startsWith(child.to) ? "#C8963E" : "rgba(245,240,232,0.72)";
+                            e.currentTarget.style.background = "transparent";
+                          }}
+                        >
+                          {child.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <a key={label} href={to} onClick={(e) => handleNav(e, to)} style={linkStyle(to)}>
+                {label}
+              </a>
+            ),
+          )}
         </div>
 
         <button onClick={() => setMenuOpen(!menuOpen)} className="mob-menu-btn"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
           style={{ background: "none", border: "none", cursor: "pointer", display: "none", flexDirection: "column", gap: 5, padding: 8 }}>
           {[0, 1, 2].map((i) => (
             <span key={i} style={{
@@ -132,15 +170,28 @@ export default function Navbar() {
       </div>
 
       {menuOpen && (
-        <div style={{ background: "rgba(5,21,14,0.98)", padding: "16px 28px 28px", borderTop: "1px solid rgba(200,150,62,0.1)" }}>
-          {LINKS.map(({ label, to }) => (
-            <a key={label} href={to} onClick={(e) => handleNav(e, to)} style={{
-              display: "block", textDecoration: "none", fontFamily: "'DM Sans', sans-serif",
-              fontSize: 15, fontWeight: 500, color: "#F5F0E8", letterSpacing: "0.05em", padding: "11px 0",
-              borderBottom: "1px solid rgba(245,240,232,0.06)",
-            }}>
-              {label}
-            </a>
+        <div style={{ background: "rgba(5,21,14,0.98)", padding: "16px 28px 28px", borderTop: "1px solid rgba(200,150,62,0.1)", maxHeight: "calc(100vh - 72px)", overflowY: "auto" }}>
+          {LINKS.map(({ label, to, children }) => (
+            <div key={label}>
+              <a href={to} onClick={(e) => handleNav(e, to)} style={{
+                display: "block", textDecoration: "none", fontFamily: "'DM Sans', sans-serif",
+                fontSize: 15, fontWeight: 500, color: "#F5F0E8", letterSpacing: "0.05em", padding: "11px 0",
+                borderBottom: "1px solid rgba(245,240,232,0.06)",
+              }}>
+                {label}
+              </a>
+              {/* Sub-pages are listed inline on mobile — a hover dropdown has
+                  no equivalent on touch. */}
+              {children?.map((child) => (
+                <a key={child.to} href={child.to} onClick={(e) => handleNav(e, child.to)} style={{
+                  display: "block", textDecoration: "none", fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 13, color: "rgba(245,240,232,0.6)", letterSpacing: "0.03em",
+                  padding: "9px 0 9px 18px", borderBottom: "1px solid rgba(245,240,232,0.04)",
+                }}>
+                  {child.label}
+                </a>
+              ))}
+            </div>
           ))}
         </div>
       )}

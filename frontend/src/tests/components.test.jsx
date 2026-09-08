@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import Navbar from '../components/Navbar'
@@ -35,7 +35,7 @@ describe('FadeIn', () => {
 describe('Navbar', () => {
   it('renders every primary link and the brand', () => {
     renderWithProviders(<Navbar />)
-    for (const label of ['Home', 'About', 'Specialisations', 'Quote', 'Contact']) {
+    for (const label of ['Home', 'About', /Areas of Expertise/, 'Request a Quote', 'Contact']) {
       expect(screen.getByRole('link', { name: label })).toBeInTheDocument()
     }
     expect(screen.getByText('AURELIA')).toBeInTheDocument()
@@ -54,6 +54,18 @@ describe('Navbar', () => {
     expect(screen.getAllByRole('link', { name: 'Home' })).toHaveLength(2)
   })
 
+  it('lists the sourcing areas inline in the mobile menu', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<Navbar />)
+
+    // A hover dropdown has no touch equivalent, so the sub-pages have to be
+    // listed outright once the mobile menu is open.
+    expect(screen.queryByRole('link', { name: 'Perfume Ingredients & Essential Oils' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { hidden: true }))
+    expect(screen.getByRole('link', { name: 'Perfume Ingredients & Essential Oils' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Sahya' })).toBeInTheDocument()
+  })
+
   it('scrolls to top when the brand logo is clicked', async () => {
     const user = userEvent.setup()
     renderWithProviders(<Navbar />, { route: '/quote' })
@@ -64,55 +76,40 @@ describe('Navbar', () => {
 
   it('marks the active route link', () => {
     renderWithProviders(<Navbar />, { route: '/quote' })
-    // The Quote link carries the gold active colour.
-    const quote = screen.getByRole('link', { name: 'Quote' })
-    expect(quote).toHaveStyle({ color: '#C8963E' })
+    expect(screen.getByRole('link', { name: 'Request a Quote' })).toHaveStyle({ color: '#C8963E' })
   })
 })
 
 describe('Footer', () => {
-  it('renders the brand and legal columns', () => {
+  it('renders the brand and every column', () => {
     renderWithProviders(<Footer />)
     expect(screen.getByText('AURELIA LOGISTICS')).toBeInTheDocument()
-    expect(screen.getByText('Company')).toBeInTheDocument()
-    expect(screen.getByText('Legal')).toBeInTheDocument()
+    for (const title of ['Company', 'What We Source', 'Legal']) {
+      expect(screen.getByText(title)).toBeInTheDocument()
+    }
   })
 
-  it('opens and closes the Privacy Policy modal', async () => {
+  it('drops the unverified claims the rewrite removed', () => {
+    renderWithProviders(<Footer />)
+    expect(screen.queryByText(/UK-registered global trade facilitator/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Kochi · Mumbai · Dubai · London/)).not.toBeInTheDocument()
+  })
+
+  it('invokes navigation for every footer link without crashing', async () => {
     const user = userEvent.setup()
     renderWithProviders(<Footer />)
 
-    await user.click(screen.getByText('Privacy Policy'))
-    const dialog = screen.getByText(/Aurelia Logistics Ltd collects personal information/)
-    expect(dialog).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: '✕' }))
-    expect(
-      screen.queryByText(/Aurelia Logistics Ltd collects personal information/),
-    ).not.toBeInTheDocument()
-  })
-
-  it('opens the Terms of Service modal', async () => {
-    const user = userEvent.setup()
-    renderWithProviders(<Footer />)
-
-    await user.click(screen.getByText('Terms of Service'))
-    expect(screen.getByText(/No binding contracts are formed/)).toBeInTheDocument()
-  })
-
-  it('invokes navigation actions for the footer links without crashing', async () => {
-    const user = userEvent.setup()
-    renderWithProviders(<Footer />)
-
-    // Each of these calls the smart-navigate helper (About, specialisations, etc.)
     for (const label of [
-      'About Us',
-      'Our Story',
-      'Ethnic Food & Grocery',
-      'Vehicle Parts',
-      'Pharmaceuticals',
-      'Sahya — Our B2C Label',
-      'Certifications',
+      'About',
+      'Areas of Expertise',
+      'Contact',
+      'Food & Grocery',
+      'Automotive Components',
+      'Healthcare & Pharmaceuticals',
+      'Perfume Ingredients & Essential Oils',
+      'Sahya',
+      'Privacy Policy',
+      'Terms of Service',
     ]) {
       await user.click(screen.getByText(label))
     }

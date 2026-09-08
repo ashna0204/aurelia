@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
 
@@ -17,39 +17,36 @@ describe('routing', () => {
     window.history.pushState({}, '', '/')
   })
 
-  it('renders the home page at /', () => {
-    renderAt('/')
-    expect(h1Text()).toMatch(/meets opportunity/)
+  it.each([
+    ['/', /meets opportunity/],
+    ['/about', /manufacturers and suppliers worldwide/],
+    ['/expertise', /What we source/],
+    ['/expertise/food-grocery', /South Asian food/],
+    ['/expertise/food-grocery/catalogue', /current food range/],
+    ['/expertise/automotive', /Automotive components/],
+    ['/expertise/healthcare', /Healthcare sourcing requires/],
+    ['/expertise/perfume', /Perfume ingredients and essential oils/],
+    ['/sahya', /Sahya/],
+    ['/quote', /Tell us what you are/],
+    ['/contact', /Let's talk about your/],
+    ['/privacy', /How we handle your/],
+    ['/terms', /Terms of/],
+    ['/does-not-exist', /gone/],
+  ])('renders %s', (path, heading) => {
+    renderAt(path)
+    expect(h1Text()).toMatch(heading)
   })
 
-  it('renders the quote page at /quote', () => {
-    renderAt('/quote')
-    expect(h1Text()).toMatch(/Tell us what/)
-  })
-
-  it('renders the specialisations index', () => {
-    renderAt('/specialisations')
-    expect(h1Text()).toMatch(/Three sectors/)
-  })
-
-  it('renders the ethnic food vertical', () => {
-    renderAt('/specialisations/ethnic-food')
-    expect(h1Text()).toMatch(/Ethnic Food/)
-  })
-
-  it('renders the vehicle parts vertical', () => {
-    renderAt('/specialisations/vehicle-parts')
-    expect(h1Text()).toMatch(/Vehicle Parts/)
-  })
-
-  it('renders the pharmaceuticals vertical', () => {
-    renderAt('/specialisations/pharmaceuticals')
-    expect(h1Text()).toMatch(/Pharmaceuticals/)
-  })
-
-  it('renders the 404 fallback for an unknown route', () => {
-    renderAt('/does-not-exist')
-    expect(h1Text()).toMatch(/gone/)
+  // The pre-rewrite URLs are the ones already shared and indexed, so they have
+  // to land on the renamed page rather than the 404.
+  it.each([
+    ['/specialisations', /What we source/],
+    ['/specialisations/ethnic-food', /South Asian food/],
+    ['/specialisations/vehicle-parts', /Automotive components/],
+    ['/specialisations/pharmaceuticals', /Healthcare sourcing requires/],
+  ])('redirects the legacy path %s', (path, heading) => {
+    renderAt(path)
+    expect(h1Text()).toMatch(heading)
   })
 
   it('navigates via a navbar link click', async () => {
@@ -57,9 +54,34 @@ describe('routing', () => {
     renderAt('/')
 
     const nav = screen.getByRole('navigation')
-    await user.click(within(nav).getByRole('link', { name: 'Quote' }))
+    await user.click(within(nav).getByRole('link', { name: 'Request a Quote' }))
 
-    expect(h1Text()).toMatch(/Tell us what/)
+    expect(h1Text()).toMatch(/Tell us what you are/)
+  })
+
+  it('reaches a sourcing area through the navbar dropdown by keyboard', async () => {
+    const user = userEvent.setup()
+    renderAt('/')
+
+    const nav = screen.getByRole('navigation')
+    // Focusing the trigger has to open the panel: on desktop the four sourcing
+    // areas are reachable no other way, and hover is not a keyboard gesture.
+    within(nav).getByRole('link', { name: /Areas of Expertise/ }).focus()
+
+    const item = await within(nav).findByRole('link', { name: 'Automotive Components' })
+    fireEvent.click(item)
+
+    expect(h1Text()).toMatch(/Automotive components/)
+  })
+
+  it('opens the dropdown on hover', async () => {
+    const user = userEvent.setup()
+    renderAt('/')
+
+    const nav = screen.getByRole('navigation')
+    expect(within(nav).queryByRole('link', { name: 'Food & Grocery' })).not.toBeInTheDocument()
+    await user.hover(within(nav).getByRole('link', { name: /Areas of Expertise/ }))
+    expect(within(nav).getByRole('link', { name: 'Food & Grocery' })).toBeInTheDocument()
   })
 
   it('navigates home from the 404 page', async () => {

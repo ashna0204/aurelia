@@ -12,11 +12,11 @@ async function submitValid(user) {
   vi.spyOn(Date, 'now').mockReturnValue(1000)
   renderWithProviders(<QuotePage />)
   await user.click(screen.getAllByRole('radio')[0])
-  await user.type(screen.getByLabelText(/What do you need/), 'We need 500kg of Matta Rice, FOB Kochi.')
-  await user.type(screen.getByLabelText(/Full Name/), 'Priya Menon')
-  await user.type(screen.getByLabelText(/^Email/), 'priya@example.com')
+  await user.type(screen.getByLabelText(/Product specification/), 'We need 500kg of Matta Rice, FOB Kochi.')
+  await user.type(screen.getByLabelText(/^Name/), 'Priya Menon')
+  await user.type(screen.getByLabelText(/Work email/), 'priya@example.com')
   Date.now.mockReturnValue(10_000) // clear the anti-bot speed bump
-  await user.click(screen.getByRole('button', { name: /Submit Quote Request/i }))
+  await user.click(screen.getByRole('button', { name: /Submit Enquiry/i }))
 }
 
 describe('QuotePage — server error states', () => {
@@ -30,9 +30,9 @@ describe('QuotePage — server error states', () => {
     await submitValid(user)
 
     expect(await screen.findByText(/Email: value is not a valid email address/)).toBeInTheDocument()
-    // Form still present, description preserved — the success screen did not appear.
-    expect(screen.getByLabelText(/What do you need/)).toHaveValue('We need 500kg of Matta Rice, FOB Kochi.')
-    expect(screen.queryByText('Quote Request Received')).not.toBeInTheDocument()
+    // Form still present, specification preserved — the success screen did not appear.
+    expect(screen.getByLabelText(/Product specification/)).toHaveValue('We need 500kg of Matta Rice, FOB Kochi.')
+    expect(screen.queryByText('Enquiry Received')).not.toBeInTheDocument()
   })
 
   it('renders a 500 error without crashing', async () => {

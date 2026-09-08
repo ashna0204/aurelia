@@ -38,24 +38,29 @@ describe('validatePhone', () => {
 
 describe('validateQuoteForm', () => {
   const valid = {
-    sector: 'Ethnic Food & Grocery',
-    description: 'We need 500kg of Matta Rice, FOB Kochi.',
     name: 'Priya Menon',
-    email: 'priya@example.com',
     company: '',
+    email: 'priya@example.com',
     phone: '',
+    country: '',
+    sector: 'Food & Grocery',
+    specification: 'We need 500kg of Matta Rice, FOB Kochi.',
+    quantity: '',
+    targetMarket: '',
+    packaging: '',
     destination: '',
+    deliveryDate: '',
     notes: '',
   }
 
   it('returns no errors for a valid form', () => {
     expect(validateQuoteForm(valid)).toEqual({})
   })
-  it('flags a missing sector', () => {
+  it('flags a missing product or category', () => {
     expect(validateQuoteForm({ ...valid, sector: '' }).sector).toBeDefined()
   })
-  it('flags a too-short description', () => {
-    expect(validateQuoteForm({ ...valid, description: 'short' }).description).toMatch(/at least/)
+  it('flags a too-short specification', () => {
+    expect(validateQuoteForm({ ...valid, specification: 'short' }).specification).toMatch(/at least/)
   })
   it('flags a bad email', () => {
     expect(validateQuoteForm({ ...valid, email: 'nope' }).email).toBeDefined()
@@ -63,24 +68,36 @@ describe('validateQuoteForm', () => {
   it('flags a short name', () => {
     expect(validateQuoteForm({ ...valid, name: 'A' }).name).toBeDefined()
   })
-  it('orders keys with sector first (topmost problem)', () => {
+  it('orders keys top-to-bottom, so the first is the topmost problem', () => {
     const errors = validateQuoteForm({ ...valid, sector: '', name: 'A' })
-    expect(Object.keys(errors)[0]).toBe('sector')
+    expect(Object.keys(errors)[0]).toBe('name')
+    expect(Object.keys(errors)).toContain('sector')
   })
   it('flags an over-long email even when otherwise valid', () => {
     const longEmail = `${'a'.repeat(LIMITS.EMAIL_MAX)}@example.com`
     expect(validateQuoteForm({ ...valid, email: longEmail }).email).toMatch(/characters or fewer/)
   })
 
-  it('flags an over-long description', () => {
-    expect(validateQuoteForm({ ...valid, description: 'x'.repeat(LIMITS.DESCRIPTION_MAX + 1) }).description).toMatch(/under/)
+  it('flags an over-long specification', () => {
+    expect(validateQuoteForm({ ...valid, specification: 'x'.repeat(LIMITS.SPECIFICATION_MAX + 1) }).specification).toMatch(/under/)
   })
 
-  it('flags oversized company / destination / notes', () => {
-    expect(validateQuoteForm({ ...valid, company: 'x'.repeat(LIMITS.COMPANY_MAX + 1) }).company).toBeDefined()
-    expect(validateQuoteForm({ ...valid, destination: 'x'.repeat(LIMITS.DESTINATION_MAX + 1) }).destination).toBeDefined()
-    expect(validateQuoteForm({ ...valid, notes: 'x'.repeat(LIMITS.NOTES_MAX + 1) }).notes).toBeDefined()
+  it('caps every optional single-line requirement field', () => {
+    const cases = [
+      ['company', LIMITS.COMPANY_MAX],
+      ['country', LIMITS.COUNTRY_MAX],
+      ['quantity', LIMITS.QUANTITY_MAX],
+      ['targetMarket', LIMITS.TARGET_MARKET_MAX],
+      ['packaging', LIMITS.PACKAGING_MAX],
+      ['destination', LIMITS.DESTINATION_MAX],
+      ['deliveryDate', LIMITS.DELIVERY_DATE_MAX],
+      ['notes', LIMITS.NOTES_MAX],
+    ]
+    for (const [field, cap] of cases) {
+      expect(validateQuoteForm({ ...valid, [field]: 'x'.repeat(cap + 1) })[field]).toBeDefined()
+    }
   })
+
 })
 
 describe('validateContactForm', () => {
