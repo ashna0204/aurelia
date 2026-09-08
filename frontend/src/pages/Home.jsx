@@ -397,12 +397,15 @@ function Hero() {
 
       <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "120px 24px 80px", maxWidth: 920, margin: "0 auto" }}>
 
+        <div style={anim(0.15)}>
+          <SectionTag label="UK-based sourcing and trade partner" />
+        </div>
 
         <h1 style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: "clamp(38px, 6.5vw, 76px)",
           fontWeight: 700, color: "#F5F0E8", lineHeight: 1.08,
-          margin: "0 0 32px",
+          margin: "0 0 20px",
           ...anim(0.3),
         }}>
           Where Origin<br />
@@ -410,17 +413,37 @@ function Hero() {
         </h1>
 
         <p style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: "clamp(20px, 2.6vw, 28px)",
+          fontWeight: 500, color: "rgba(245,240,232,0.88)", lineHeight: 1.4,
+          margin: "0 0 26px",
+          ...anim(0.4),
+        }}>
+          Manufacturers and suppliers. Global buyers.
+        </p>
+
+        <p style={{
           fontFamily: "'DM Sans', sans-serif",
           fontSize: "clamp(16px, 1.9vw, 19px)",
           color: "rgba(245,240,232,0.72)", lineHeight: 1.75,
-          maxWidth: 600, margin: "0 auto 52px",
-          ...anim(0.48),
+          maxWidth: 640, margin: "0 auto 22px",
+          ...anim(0.56),
         }}>
-          Aurelia Logistics connects the finest goods from South Asia with global markets — across ethnic foods, vehicle components, and pharmaceutical supplies.
+          Aurelia helps international businesses source products from trusted manufacturers and suppliers across global markets.
         </p>
 
-        <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", ...anim(0.62) }}>
-          <button onClick={() => navigate("/specialisations")} style={{
+        <p style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: "clamp(14px, 1.5vw, 16px)",
+          color: "rgba(245,240,232,0.55)", lineHeight: 1.8,
+          maxWidth: 700, margin: "0 auto 52px",
+          ...anim(0.68),
+        }}>
+          We work across food and grocery, automotive components, healthcare products, and perfume ingredients and essential oils. We help buyers identify suitable suppliers, understand product requirements, coordinate the commercial process, and move suitable orders towards export.
+        </p>
+
+        <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", ...anim(0.8) }}>
+          <button onClick={() => navigate("/quote")} style={{
             fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600,
             padding: "16px 38px", borderRadius: 3, cursor: "pointer",
             letterSpacing: "0.14em", textTransform: "uppercase",
@@ -432,9 +455,9 @@ function Hero() {
             onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(200,150,62,0.32)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(200,150,62,0.22)"; }}
           >
-            Our Specialisations
+            Request a Quote
           </button>
-          <button onClick={() => navigate("/quote")} style={{
+          <button onClick={() => navigate("/specialisations")} style={{
             fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500,
             padding: "16px 38px", borderRadius: 3, cursor: "pointer",
             letterSpacing: "0.14em", textTransform: "uppercase",
@@ -445,7 +468,7 @@ function Hero() {
             onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#C8963E"; e.currentTarget.style.color = "#C8963E"; }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(245,240,232,0.22)"; e.currentTarget.style.color = "#F5F0E8"; }}
           >
-            Request a Quote
+            Explore Our Expertise
           </button>
         </div>
       </div>
@@ -453,6 +476,74 @@ function Hero() {
       <div style={{ position: "absolute", bottom: 36, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, opacity: 0.4 }}>
         <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, color: "#F5F0E8", letterSpacing: "0.3em", textTransform: "uppercase" }}>Scroll</span>
         <div style={{ width: 1, height: 40, background: "linear-gradient(to bottom, #C8963E, transparent)" }} />
+      </div>
+    </section>
+  );
+}
+
+/* ─── BEYOND SOURCING ─── */
+// Sits between the pinned trade-route animation and the cream About section,
+// so it stays on the dark ground and reads as a beat of the same breath.
+function BeyondSourcing() {
+  return (
+    <section style={{ background: "#071E12", padding: "120px 24px", position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 0%, rgba(200,150,62,0.06) 0%, transparent 60%)" }} />
+      <div style={{ maxWidth: 860, margin: "0 auto", position: "relative", textAlign: "center" }}>
+        <FadeIn>
+          <h2 style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: "clamp(28px, 4vw, 50px)",
+            fontWeight: 700, color: "#F5F0E8", lineHeight: 1.15, margin: 0,
+          }}>
+            Finding the right supplier is<br />
+            <span style={{ color: "#C8963E", fontStyle: "italic" }}>only the first step.</span>
+          </h2>
+        </FadeIn>
+        <FadeIn delay={0.12}>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: "clamp(16px, 1.8vw, 18px)",
+            color: "rgba(245,240,232,0.62)", lineHeight: 1.85,
+            maxWidth: 720, margin: "30px auto 0",
+          }}>
+            Buying from a new market can involve more work than finding a product online. Aurelia helps buyers navigate the sourcing process in South Asia. We identify suitable suppliers, discuss specifications and pricing, coordinate samples and documentation, and help move enquiries towards a commercial decision.
+          </p>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
+/* ─── BRIDGE ─── */
+// Two columns rather than another centred statement, so it does not read as a
+// repeat of BeyondSourcing above it, and a step lighter on the way to About's
+// cream. Shares .about-grid's mobile collapse.
+function Bridge() {
+  return (
+    <section style={{ background: "#0A2E1C", padding: "110px 24px", position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "absolute", inset: 0, opacity: 0.03, backgroundImage: "radial-gradient(#F5F0E8 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+      <div style={{ maxWidth: 1120, margin: "0 auto", position: "relative" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 72, alignItems: "center" }} className="about-grid">
+          <FadeIn>
+            <h2 style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: "clamp(28px, 3.6vw, 44px)",
+              fontWeight: 700, color: "#F5F0E8", lineHeight: 1.2, margin: 0,
+            }}>
+              A bridge between buyers and{" "}
+              <span style={{ color: "#C8963E", fontStyle: "italic" }}>manufacturers and suppliers worldwide.</span>
+            </h2>
+          </FadeIn>
+          <FadeIn delay={0.12} direction="left">
+            <p style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "clamp(16px, 1.8vw, 18px)",
+              color: "rgba(245,240,232,0.62)", lineHeight: 1.85, margin: 0,
+            }}>
+              Aurelia works between international buyers and manufacturers and suppliers worldwide. We help translate a buyer's requirement into a practical sourcing brief, then work with the supply side to find options that fit.
+            </p>
+          </FadeIn>
+        </div>
       </div>
     </section>
   );
@@ -811,6 +902,8 @@ export default function Home() {
     <>
       <Hero />
       <ScrollJourney />
+      <BeyondSourcing />
+      <Bridge />
       <About />
       <SpecialisationsPreview />
       <QuoteCTA />
