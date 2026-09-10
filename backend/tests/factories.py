@@ -11,7 +11,7 @@ fake = Faker()
 Faker.seed(20260727)
 
 # The closed sector vocabulary the API accepts (mirrors schemas.Sector).
-VALID_SECTOR = "Ethnic Food & Grocery"
+VALID_SECTOR = "Food & Grocery"
 VALID_VOLUME = "5 – 20 MT"
 VALID_FREQUENCY = "Monthly"
 

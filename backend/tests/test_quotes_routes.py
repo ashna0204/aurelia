@@ -17,7 +17,7 @@ def test_create_quote_persists_row_and_returns_id(client, db_session):
     row = db_session.query(QuoteRequest).filter_by(id=body["id"]).one()
     assert row.name == "Priya Menon"
     assert row.email == "priya.menon@example.com"
-    assert row.products == ["Ethnic Food & Grocery"]
+    assert row.products == ["Food & Grocery"]
     assert row.status == "new"
 
 

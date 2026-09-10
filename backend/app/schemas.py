@@ -78,16 +78,22 @@ def _validate_phone(value: str | None) -> str | None:
 #
 # The UI presents these as fixed choices, so the API accepts exactly these and
 # nothing else: an allow-list is the only thing that makes the stored values
-# usable for routing or reporting later. Mirrored verbatim in
-# frontend/src/constants/quoteForm.js — the two lists must stay in step.
+# usable for routing or reporting later. `Sector` mirrors the four sourcing
+# areas in frontend/src/constants/expertise.js plus the catch-all — the two
+# lists must stay in step.
+#
+# Volume and Frequency are no longer offered by the enquiry form, which asks
+# for quantity as free text instead. They stay here, optional, because rows
+# already in the database carry these values and the response model reads them.
 #
 # The en dashes in VOLUMES are written as – escapes on purpose: they are
 # part of the matched value, and an editor silently rewriting one to a hyphen
 # would turn every quote submission into a 422.
 Sector = Literal[
-    "Ethnic Food & Grocery",
-    "Vehicle Parts & Accessories",
-    "Pharmaceuticals & Healthcare",
+    "Food & Grocery",
+    "Automotive Components",
+    "Healthcare & Pharmaceuticals",
+    "Perfume Ingredients & Essential Oils",
     "Multiple / Other",
 ]
 Volume = Literal[

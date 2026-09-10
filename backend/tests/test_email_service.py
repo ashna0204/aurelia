@@ -13,7 +13,7 @@ async def test_notify_new_quote_sends_expected_recipient_and_subject(sent_emails
         {
             "name": "Priya Menon",
             "email": "priya@example.com",
-            "products": ["Ethnic Food & Grocery"],
+            "products": ["Food & Grocery"],
             "message": "Need Matta Rice.",
         }
     )
@@ -23,7 +23,7 @@ async def test_notify_new_quote_sends_expected_recipient_and_subject(sent_emails
     msg = sent_emails[0]
     assert msg["To"] == "ops@aurelia.test"
     assert "Priya Menon" in msg["Subject"]
-    assert "Ethnic Food & Grocery" in msg["Subject"]
+    assert "Food & Grocery" in msg["Subject"]
     body = email_text(msg)
     assert "priya@example.com" in body
     assert "Need Matta Rice." in body

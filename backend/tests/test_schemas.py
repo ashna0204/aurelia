@@ -19,7 +19,7 @@ from tests.factories import contact_payload, quote_payload
 
 def test_quotecreate_accepts_valid_payload():
     model = QuoteCreate(**quote_payload())
-    assert model.products == ["Ethnic Food & Grocery"]
+    assert model.products == ["Food & Grocery"]
     assert model.website is None
 
 
@@ -109,7 +109,7 @@ def test_quoteresponse_serializes_from_attributes():
         email = "p@example.com"
         company = None
         phone = None
-        products = ["Ethnic Food & Grocery"]
+        products = ["Food & Grocery"]
         volume = None
         frequency = None
         destination = None
@@ -119,7 +119,7 @@ def test_quoteresponse_serializes_from_attributes():
 
     model = QuoteResponse.model_validate(Row())
     assert model.id == 7
-    assert model.products == ["Ethnic Food & Grocery"]
+    assert model.products == ["Food & Grocery"]
 
 
 def test_successresponse_defaults():
